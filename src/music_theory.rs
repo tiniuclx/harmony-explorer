@@ -3,7 +3,7 @@ extern crate num_traits;
 use num_traits::{FromPrimitive, ToPrimitive};
 use std::ops;
 
-#[derive(Debug, Primitive)]
+#[derive(Debug, PartialEq, Eq, Primitive)]
 pub enum Note {
     A = 0,
     Bb = 1,
@@ -34,5 +34,29 @@ impl ops::Sub<i64> for Note {
 
     fn sub(self, other: i64) -> Note {
         self + (-other)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn small_transposition() {
+        assert_eq!(Note::G, Note::C + 7);
+    }
+
+    #[test]
+    fn big_transposition() {
+        assert_eq!(Note::C, Note::C + 12);
+        assert_eq!(Note::C, Note::C + 24);
+        assert_eq!(Note::C, Note::C + 144);
+    }
+
+    #[test]
+    fn transpose_down() {
+        assert_eq!(Note::Db, Note::D - 1);
+        assert_eq!(Note::C, Note::G - 7);
+        assert_eq!(Note::C, Note::C - 24);
     }
 }
