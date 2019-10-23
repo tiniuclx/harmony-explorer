@@ -37,9 +37,43 @@ impl ops::Sub<i64> for Note {
     }
 }
 
+#[allow(dead_code)]
+pub enum Interval {
+    Unison,
+    Min2nd,
+    Maj2nd,
+    Min3rd,
+    Maj3rd,
+    Per4th,
+    Dim5th,
+    Per5th,
+    Min6th,
+    Maj6th,
+    Min7th,
+    Maj7th,
+    Octave,
+}
+
+impl ops::Add<Interval> for Note {
+    type Output = Note;
+
+    fn add(self, other: Interval) -> Note {
+        self + other as i64
+    }
+}
+
+impl ops::Sub<Interval> for Note {
+    type Output = Note;
+
+    fn sub(self, other: Interval) -> Note {
+        self - other as i64
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use Interval::*;
 
     #[test]
     fn small_transposition() {
@@ -58,5 +92,17 @@ mod tests {
         assert_eq!(Note::Db, Note::D - 1);
         assert_eq!(Note::C, Note::G - 7);
         assert_eq!(Note::C, Note::C - 24);
+    }
+
+    #[test]
+    fn interval_maths() {
+        assert_eq!(Note::C, Note::F + Per5th);
+        assert_eq!(Note::C, Note::C + Octave);
+        assert_eq!(Note::C, Note::C + Octave + Octave);
+
+        assert_eq!(Note::C, Note::G - Per5th);
+        assert_eq!(Note::C, Note::C - Octave);
+        assert_eq!(Note::C, Note::C - Per4th - Per5th);
+        assert_eq!(Note::C - Min2nd, Note::C + Maj7th);
     }
 }
