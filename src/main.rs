@@ -2,14 +2,14 @@
 extern crate enum_primitive_derive;
 
 mod music_theory;
-use music_theory::MusicalNote;
+use music_theory::Note;
 
 fn main() {
-    println!("{:?}", MusicalNote::C);
-    println!("{:?}", MusicalNote::C + 7);
-    println!("{:?}", MusicalNote::C + 12);
-    println!("{:?}", MusicalNote::C + 48);
-    println!("{:?}", MusicalNote::C - 2);
-    println!("{:?}", MusicalNote::C - 7);
-    println!("{:?}", MusicalNote::C - 22);
+    println!("{:?}", Note::C);
+    println!("{:?}", Note::C + 7);
+    println!("{:?}", Note::C + 12);
+    println!("{:?}", Note::C + 48);
+    println!("{:?}", Note::C - 2);
+    println!("{:?}", Note::C - 7);
+    println!("{:?}", Note::C - 22);
 }

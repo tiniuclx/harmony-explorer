@@ -4,7 +4,7 @@ use num_traits::{FromPrimitive, ToPrimitive};
 use std::ops;
 
 #[derive(Debug, Primitive)]
-pub enum MusicalNote {
+pub enum Note {
     A = 0,
     Bb = 1,
     B = 2,
@@ -18,21 +18,21 @@ pub enum MusicalNote {
     G = 10,
     Ab = 11,
 }
-impl ops::Add<i64> for MusicalNote {
-    type Output = MusicalNote;
+impl ops::Add<i64> for Note {
+    type Output = Note;
 
-    fn add(self, other: i64) -> MusicalNote {
-        let note = MusicalNote::to_i64(&self).expect("MusicalNote::to_i64 failed!");
+    fn add(self, other: i64) -> Note {
+        let note = Note::to_i64(&self).expect("Note::to_i64 failed!");
         let transposed = (note + other).rem_euclid(12);
 
-        MusicalNote::from_i64(transposed).expect("MusicalNote::from_i64 failed!")
+        Note::from_i64(transposed).expect("Note::from_i64 failed!")
     }
 }
 
-impl ops::Sub<i64> for MusicalNote {
-    type Output = MusicalNote;
+impl ops::Sub<i64> for Note {
+    type Output = Note;
 
-    fn sub(self, other: i64) -> MusicalNote {
+    fn sub(self, other: i64) -> Note {
         self + (-other)
     }
 }
