@@ -5,6 +5,7 @@ extern crate rustyline;
 mod music_theory;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
+use std::error::Error;
 
 extern crate find_folder; // For easily finding the assets folder.
 extern crate pitch_calc as pitch; // To work with musical notes.
@@ -20,7 +21,9 @@ const FRAMES_PER_BUFFER: u32 = 64;
 //const THUMB_PIANO: &'static str = "thumbpiano A#3.wav";
 const CASIO_PIANO: &'static str = "Casio Piano C5.wav";
 
-fn run() -> Result<(), pa::Error> {
+fn main() -> Result<(), Box<dyn Error>> {
+    let mut rl = Editor::<()>::new();
+
     // We'll create a sample map that maps a single sample to the entire note range.
     let assets = find_folder::Search::ParentsThenKids(5, 5)
         .for_folder("assets")
@@ -29,7 +32,7 @@ fn run() -> Result<(), pa::Error> {
     let sample_map = sampler::Map::from_single_sample(sample);
 
     // Create a polyphonic sampler.
-    let mut sampler = Sampler::poly((), sample_map).num_voices(4);
+    let mut sampler = Sampler::poly((), sample_map).num_voices(12);
 
     // Initialise PortAudio and create an output stream.
     let pa = pa::PortAudio::new()?;
@@ -47,7 +50,7 @@ fn run() -> Result<(), pa::Error> {
             let vel = 0.3;
             sampler.note_on(pitch::LetterOctave(pitch::Letter::C, 4).to_hz(), vel);
             sampler.note_on(pitch::LetterOctave(pitch::Letter::E, 4).to_hz(), vel);
-            sampler.note_on(pitch::LetterOctave(pitch::Letter::G, 4).to_hz(), vel);
+            sampler.note_on(pitch::LetterOctave(pitch::Letter::G, 1).to_hz(), vel);
         }
 
         sampler.fill_slice(buffer, SAMPLE_RATE);
@@ -56,23 +59,8 @@ fn run() -> Result<(), pa::Error> {
     };
 
     let mut stream = pa.open_non_blocking_stream(settings, callback)?;
-
     stream.start()?;
-
-    while let Ok(true) = stream.is_active() {
-        std::thread::sleep(std::time::Duration::from_millis(16));
-    }
-
-    stream.stop()?;
-    stream.close()?;
-
-    Ok(())
-}
-
-fn main() {
-    let mut rl = Editor::<()>::new();
-
-    run().unwrap();
+    // Audio initialisation is complete. Start processing input.
 
     loop {
         let readline = rl.readline("♪♪♪ ");
@@ -94,4 +82,7 @@ fn main() {
             }
         }
     }
+    stream.stop()?;
+    stream.close()?;
+    Ok(())
 }
