@@ -9,11 +9,13 @@ extern crate sampler;
 
 mod music_theory;
 
+use std::error::Error;
+use std::sync::{Arc, Mutex};
+
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
 use sampler::Sampler;
-use std::error::Error;
 
 const CHANNELS: i32 = 2;
 const SAMPLE_RATE: f64 = 44_100.0;
@@ -32,7 +34,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let sample_map = sampler::Map::from_single_sample(sample);
 
     // Create a polyphonic sampler.
-    let mut sampler = Sampler::poly((), sample_map).num_voices(12);
+    let sampler_data = Sampler::poly((), sample_map).num_voices(12);
+    let sampler_data_ref = Arc::new(Mutex::new(sampler_data));
 
     // Initialise PortAudio and create an output stream.
     let pa = pa::PortAudio::new()?;
@@ -45,6 +48,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             sample::slice::to_frame_slice_mut(buffer).unwrap();
         sample::slice::equilibrium(buffer);
 
+        let mut sampler = sampler_data_ref.lock().unwrap();
         // If the sampler is not currently active, play a note.
         if !sampler.is_active() {
             let vel = 0.3;
@@ -60,8 +64,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut stream = pa.open_non_blocking_stream(settings, callback)?;
     stream.start()?;
-    // Audio initialisation is complete. Start processing input.
 
+    // Audio initialisation is complete. Start processing keyboard input.
     loop {
         let readline = rl.readline("♪♪♪ ");
         match readline {
