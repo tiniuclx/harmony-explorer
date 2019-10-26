@@ -4,7 +4,7 @@ pub use pitch_calc::{LetterOctave, Step};
 use pitch_calc::letter_octave_from_step;
 
 // TODO: implement Display for interval
-pub type Interval = i8;
+pub type Interval = i32;
 #[allow(dead_code, non_upper_case_globals)]
 pub mod interval {
     use super::*;
@@ -30,7 +30,7 @@ pub fn transpose(note: LetterOctave, interval: Interval) -> LetterOctave {
 }
 
 // TODO: implement Display for Degree
-pub type Degree = u8;
+pub type Degree = i32;
 #[allow(dead_code)]
 pub mod degree {
     use super::*;

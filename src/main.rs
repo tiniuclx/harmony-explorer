@@ -14,6 +14,7 @@ extern crate sampler;
 
 mod database;
 mod music_theory;
+mod schema;
 
 use std::error::Error;
 use std::sync::{Arc, Mutex};
