@@ -19,7 +19,7 @@ use sampler::Sampler;
 
 const CHANNELS: i32 = 2;
 const SAMPLE_RATE: f64 = 44_100.0;
-const FRAMES_PER_BUFFER: u32 = 64;
+const FRAMES_PER_BUFFER: u32 = 1024;
 //const THUMB_PIANO: &'static str = "thumbpiano A#3.wav";
 const CASIO_PIANO: &'static str = "Casio Piano C5.wav";
 
@@ -33,30 +33,20 @@ fn main() -> Result<(), Box<dyn Error>> {
     let sample = sampler::Sample::from_wav_file(assets.join(CASIO_PIANO), SAMPLE_RATE).unwrap();
     let sample_map = sampler::Map::from_single_sample(sample);
 
-    // Create a polyphonic sampler.
-    let sampler_data = Sampler::poly((), sample_map).num_voices(12);
-    let sampler_data_ref = Arc::new(Mutex::new(sampler_data));
+    // Create atomic RC pointer to a mutex protecting the polyphonic sampler
+    let sampler_arc = Arc::new(Mutex::new(Sampler::poly((), sample_map).num_voices(12)));
 
     // Initialise PortAudio and create an output stream.
     let pa = pa::PortAudio::new()?;
-    println!("Device count: {:?}", pa.device_count());
     let settings =
         pa.default_output_stream_settings::<f32>(CHANNELS, SAMPLE_RATE, FRAMES_PER_BUFFER)?;
-
+    let sampler_arc_callback = sampler_arc.clone();
     let callback = move |pa::OutputStreamCallbackArgs { buffer, .. }| {
         let buffer: &mut [[f32; CHANNELS as usize]] =
             sample::slice::to_frame_slice_mut(buffer).unwrap();
         sample::slice::equilibrium(buffer);
 
-        let mut sampler = sampler_data_ref.lock().unwrap();
-        // If the sampler is not currently active, play a note.
-        if !sampler.is_active() {
-            let vel = 0.3;
-            sampler.note_on(pitch::LetterOctave(pitch::Letter::C, 4).to_hz(), vel);
-            sampler.note_on(pitch::LetterOctave(pitch::Letter::E, 4).to_hz(), vel);
-            sampler.note_on(pitch::LetterOctave(pitch::Letter::G, 1).to_hz(), vel);
-        }
-
+        let mut sampler = sampler_arc_callback.lock().unwrap();
         sampler.fill_slice(buffer, SAMPLE_RATE);
 
         pa::Continue
@@ -70,6 +60,16 @@ fn main() -> Result<(), Box<dyn Error>> {
         let readline = rl.readline("♪♪♪ ");
         match readline {
             Ok(line) => {
+                {
+                    // Sampler code is in a new block so that RAII releases the mutex
+                    // as soon as possible
+                    let mut sampler = sampler_arc.lock().unwrap();
+                    let vel = 0.3;
+                    sampler.note_on(pitch::LetterOctave(pitch::Letter::C, 4).to_hz(), vel);
+                    sampler.note_on(pitch::LetterOctave(pitch::Letter::E, 4).to_hz(), vel);
+                    sampler.note_on(pitch::LetterOctave(pitch::Letter::G, 4).to_hz(), vel);
+                    sampler.note_on(pitch::LetterOctave(pitch::Letter::A, 4).to_hz(), vel);
+                }
                 println!("{}", line);
             }
             Err(ReadlineError::Interrupted) => {
