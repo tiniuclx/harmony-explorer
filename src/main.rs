@@ -26,7 +26,7 @@ const FRAMES_PER_BUFFER: u32 = 512;
 const CASIO_PIANO: &'static str = "Casio Piano C5.wav";
 
 fn main() -> Result<(), Box<dyn Error>> {
-    // Initialise Audio plumbing and sampler.
+    // Initialise audio plumbing and sampler.
     // Suppress warnings from PortAudio
     let gag_stderr = Gag::stderr();
 
@@ -46,6 +46,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         pa.default_output_stream_settings::<f32>(CHANNELS, SAMPLE_RATE, FRAMES_PER_BUFFER)?;
     let sampler_arc_callback = sampler_arc.clone();
 
+    // Callback is frequently called by PortAudio to fill the audio buffer with samples,
+    // which generates sound. Do not do expensive or blocking things in this function!
     let callback = move |pa::OutputStreamCallbackArgs { buffer, .. }| {
         let gag_stderr = Gag::stderr();
         let buffer: &mut [[f32; CHANNELS as usize]] =
