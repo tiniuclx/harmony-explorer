@@ -1,19 +1,19 @@
 extern crate enum_primitive_derive;
-extern crate num_traits;
-extern crate rustyline;
-
-mod music_theory;
-use rustyline::error::ReadlineError;
-use rustyline::Editor;
-use std::error::Error;
-
 extern crate find_folder; // For easily finding the assets folder.
+extern crate num_traits;
 extern crate pitch_calc as pitch; // To work with musical notes.
 extern crate portaudio as pa; // For audio I/O
+extern crate rustyline;
 extern crate sample; // To convert portaudio sample buffers to frames.
 extern crate sampler;
 
+mod music_theory;
+
+use rustyline::error::ReadlineError;
+use rustyline::Editor;
+
 use sampler::Sampler;
+use std::error::Error;
 
 const CHANNELS: i32 = 2;
 const SAMPLE_RATE: f64 = 44_100.0;
