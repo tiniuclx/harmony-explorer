@@ -1,6 +1,6 @@
 #[allow(dead_code, non_upper_case_globals)]
 pub mod interval {
-    type Interval = i64;
+    type Interval = u8;
     pub const Unison: Interval = 0;
     pub const Min2nd: Interval = 1;
     pub const Maj2nd: Interval = 2;
