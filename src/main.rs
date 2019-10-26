@@ -1,5 +1,6 @@
 extern crate enum_primitive_derive;
 extern crate find_folder; // For easily finding the assets folder.
+extern crate gag;
 extern crate num_traits;
 extern crate pitch_calc as pitch; // To work with musical notes.
 extern crate portaudio as pa; // For audio I/O
@@ -15,16 +16,19 @@ use std::sync::{Arc, Mutex};
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
+use gag::Gag;
 use sampler::Sampler;
 
 const CHANNELS: i32 = 2;
 const SAMPLE_RATE: f64 = 44_100.0;
-const FRAMES_PER_BUFFER: u32 = 1024;
+const FRAMES_PER_BUFFER: u32 = 512;
 //const THUMB_PIANO: &'static str = "thumbpiano A#3.wav";
 const CASIO_PIANO: &'static str = "Casio Piano C5.wav";
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut rl = Editor::<()>::new();
+    // Initialise Audio plumbing and sampler.
+    // Suppress warnings from PortAudio
+    let gag_stderr = Gag::stderr();
 
     // We'll create a sample map that maps a single sample to the entire note range.
     let assets = find_folder::Search::ParentsThenKids(5, 5)
@@ -41,7 +45,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     let settings =
         pa.default_output_stream_settings::<f32>(CHANNELS, SAMPLE_RATE, FRAMES_PER_BUFFER)?;
     let sampler_arc_callback = sampler_arc.clone();
+
     let callback = move |pa::OutputStreamCallbackArgs { buffer, .. }| {
+        let gag_stderr = Gag::stderr();
         let buffer: &mut [[f32; CHANNELS as usize]] =
             sample::slice::to_frame_slice_mut(buffer).unwrap();
         sample::slice::equilibrium(buffer);
@@ -49,13 +55,17 @@ fn main() -> Result<(), Box<dyn Error>> {
         let mut sampler = sampler_arc_callback.lock().unwrap();
         sampler.fill_slice(buffer, SAMPLE_RATE);
 
+        drop(gag_stderr);
         pa::Continue
     };
 
     let mut stream = pa.open_non_blocking_stream(settings, callback)?;
     stream.start()?;
+    drop(gag_stderr);
 
     // Audio initialisation is complete. Start processing keyboard input.
+    let mut rl = Editor::<()>::new();
+
     loop {
         let readline = rl.readline("♪♪♪ ");
         match readline {
