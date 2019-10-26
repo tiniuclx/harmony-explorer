@@ -1,3 +1,7 @@
+#[macro_use]
+extern crate diesel;
+#[macro_use]
+extern crate diesel_migrations;
 extern crate enum_primitive_derive;
 extern crate find_folder; // For easily finding the assets folder.
 extern crate gag;
@@ -8,6 +12,7 @@ extern crate rustyline;
 extern crate sample; // To convert portaudio sample buffers to frames.
 extern crate sampler;
 
+mod database;
 mod music_theory;
 
 use std::error::Error;

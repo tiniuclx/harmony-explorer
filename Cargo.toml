@@ -7,14 +7,16 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# For music theory
+# Music Theory
 num = "0.2.0"
+num-traits ="0.2.8"
 pitch_calc = "0.11.1"
 enum-primitive-derive = "0.1.2"
-num-traits ="0.2.8"
+diesel = {version = "1.4.3", features = ["sqlite"]}
+diesel_migrations = "1.4.0"
 # REPL library
 rustyline = "5.0.3"
-# Audio stuff
+# Audio 
 sampler = "0.2.0"
 find_folder = "0.3.0"
 portaudio = "0.7.0"
