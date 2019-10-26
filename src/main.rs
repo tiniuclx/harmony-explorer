@@ -19,9 +19,11 @@ use rustyline::Editor;
 use gag::Gag;
 use sampler::Sampler;
 
+use music_theory::Chord;
+
 const CHANNELS: i32 = 2;
 const SAMPLE_RATE: f64 = 44_100.0;
-const FRAMES_PER_BUFFER: u32 = 512;
+const FRAMES_PER_BUFFER: u32 = 1024;
 //const THUMB_PIANO: &'static str = "thumbpiano A#3.wav";
 const CASIO_PIANO: &'static str = "Casio Piano C5.wav";
 
@@ -73,14 +75,21 @@ fn main() -> Result<(), Box<dyn Error>> {
         match readline {
             Ok(line) => {
                 {
-                    // Sampler code is in a new block so that RAII releases the mutex
-                    // as soon as possible
+                    use music_theory::{degree::*, interval::*};
+                    use pitch_calc::Letter;
+                    use pitch_calc::LetterOctave;
+
                     let mut sampler = sampler_arc.lock().unwrap();
                     let vel = 0.3;
-                    sampler.note_on(pitch::LetterOctave(pitch::Letter::C, 4).to_hz(), vel);
-                    sampler.note_on(pitch::LetterOctave(pitch::Letter::E, 4).to_hz(), vel);
-                    sampler.note_on(pitch::LetterOctave(pitch::Letter::G, 4).to_hz(), vel);
-                    sampler.note_on(pitch::LetterOctave(pitch::Letter::A, 4).to_hz(), vel);
+
+                    let c_maj = Chord {
+                        root: LetterOctave(Letter::C, 4),
+                        quality: vec![(Maj3rd, III), (Per5th, V), (Maj6th, VI)],
+                    };
+
+                    c_maj.notes().iter().for_each(|n| {
+                        sampler.note_on(n.to_hz(), vel);
+                    });
                 }
                 println!("{}", line);
             }

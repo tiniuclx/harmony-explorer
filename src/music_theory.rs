@@ -47,10 +47,11 @@ pub type Quality = Vec<(Interval, Degree)>;
 
 #[derive(PartialEq, Eq, Debug)]
 pub struct Chord {
-    root: LetterOctave,
-    quality: Quality,
+    pub root: LetterOctave,
+    pub quality: Quality,
 }
 
+#[allow(dead_code)]
 impl Chord {
     pub fn transposed(&self, interval: Interval) -> Chord {
         let transposed = self.root.step() + interval as f32;
