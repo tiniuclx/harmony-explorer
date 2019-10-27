@@ -3,6 +3,21 @@ pub use pitch_calc::{LetterOctave, Step};
 
 use pitch_calc::letter_octave_from_step;
 
+// TODO: implement Display for Degree
+pub type Degree = i32;
+#[allow(dead_code)]
+/// Helper module exporting constants for roman numeral chord and scale degrees.
+pub mod degrees {
+    use super::*;
+    pub const I: Degree = 1;
+    pub const II: Degree = 2;
+    pub const III: Degree = 3;
+    pub const IV: Degree = 4;
+    pub const V: Degree = 5;
+    pub const VI: Degree = 6;
+    pub const VII: Degree = 7;
+}
+
 // TODO: implement Display for interval
 pub type Interval = i32;
 #[allow(dead_code, non_upper_case_globals)]
@@ -27,34 +42,47 @@ pub mod intervals {
     pub const Octave: Interval = 12;
 }
 
-/// Transpose the note by the number of semitones in interval
-pub fn transpose(note: LetterOctave, interval: Interval) -> LetterOctave {
-    let interval_s = interval as pitch_calc::calc::Step;
-    let (letter, octave) = letter_octave_from_step(note.step() + interval_s);
-    LetterOctave(letter, octave)
-}
-
-// TODO: implement Display for Degree
-pub type Degree = i32;
-#[allow(dead_code)]
-/// Helper module exporting constants for roman numeral chord and scale degrees.
-pub mod degrees {
+#[allow(dead_code, non_upper_case_globals)]
+// Contains constants of the type (Degree, Interval). Useful mostly for building Chords.
+pub mod degree_intervals {
     use super::*;
-    pub const I: Degree = 1;
-    pub const II: Degree = 2;
-    pub const III: Degree = 3;
-    pub const IV: Degree = 4;
-    pub const V: Degree = 5;
-    pub const VI: Degree = 6;
-    pub const VII: Degree = 7;
+    use degrees::*;
+    pub const Root: (Degree, Interval) = (I, intervals::Root);
+
+    pub const Min2nd: (Degree, Interval) = (II, intervals::Min2nd);
+    pub const Maj2nd: (Degree, Interval) = (II, intervals::Maj2nd);
+
+    pub const Min3rd: (Degree, Interval) = (III, intervals::Min3rd);
+    pub const Maj3rd: (Degree, Interval) = (III, intervals::Maj3rd);
+
+    pub const Per4th: (Degree, Interval) = (IV, intervals::Per4th);
+
+    pub const Dim5th: (Degree, Interval) = (V, intervals::Dim5th);
+    pub const Per5th: (Degree, Interval) = (V, intervals::Per5th);
+    pub const Aug5th: (Degree, Interval) = (V, intervals::Aug5th);
+
+    pub const Min6th: (Degree, Interval) = (VI, intervals::Min6th);
+    pub const Maj6th: (Degree, Interval) = (VI, intervals::Maj6th);
+
+    pub const Min7th: (Degree, Interval) = (VII, intervals::Min7th);
+    pub const Maj7th: (Degree, Interval) = (VII, intervals::Maj7th);
+
+    pub const Octave: (Degree, Interval) = (I, intervals::Octave);
 }
 
-pub type Quality = Vec<(Interval, Degree)>;
+pub type Quality = Vec<(Degree, Interval)>;
 
 #[derive(PartialEq, Eq, Debug)]
 pub struct Chord {
     pub root: LetterOctave,
     pub quality: Quality,
+}
+
+/// Transpose the note by the number of semitones in interval
+pub fn transpose(note: LetterOctave, interval: Interval) -> LetterOctave {
+    let interval_s = interval as pitch_calc::calc::Step;
+    let (letter, octave) = letter_octave_from_step(note.step() + interval_s);
+    LetterOctave(letter, octave)
 }
 
 #[allow(dead_code)]
@@ -103,7 +131,7 @@ impl Chord {
         self.quality
             .clone()
             .into_iter()
-            .map(|(i, _)| transpose(self.root, i))
+            .map(|(_, i)| transpose(self.root, i))
             .fold(vec![self.root()], |mut ns, n| {
                 ns.push(n);
                 ns
@@ -114,14 +142,13 @@ impl Chord {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use degrees::*;
-    use intervals::*;
 
     #[allow(unused_imports)]
     use pitch_calc::Letter::*;
 
     #[test]
     fn interval_maths() {
+        use intervals::*;
         assert_eq!(C, F + Per5th);
         assert_eq!(C, C + Octave);
         assert_eq!(C, C + Octave + Octave);
@@ -135,28 +162,29 @@ mod tests {
     #[test]
     #[allow(non_snake_case)]
     fn chord_maths() {
+        use degree_intervals::*;
         let Cmaj = Chord {
             root: LetterOctave(Letter::C, 4),
-            quality: vec![(Maj3rd, III), (Per5th, V)],
+            quality: vec![Maj3rd, Per5th],
         };
 
         let Gmaj = Chord {
             root: LetterOctave(Letter::G, 4),
-            quality: vec![(Maj3rd, III), (Per5th, V)],
+            quality: vec![Maj3rd, Per5th],
         };
 
         let Amin = Chord {
             root: LetterOctave(Letter::A, 4),
-            quality: vec![(Min3rd, III), (Per5th, V)],
+            quality: vec![Min3rd, Per5th],
         };
 
-        assert_eq!(Gmaj, Cmaj.transposed(Per5th));
+        assert_eq!(Gmaj, Cmaj.transposed(intervals::Per5th));
         assert_eq!(Gmaj, Cmaj.with_root(LetterOctave(Letter::G, 4)));
         assert_eq!(Gmaj, Cmaj.with_root_letter(Letter::G));
 
         let Amin_generated = Cmaj
-            .transposed(Maj6th)
-            .with_quality(vec![(Min3rd, III), (Per5th, V)]);
+            .transposed(intervals::Maj6th)
+            .with_quality(vec![Min3rd, Per5th]);
         assert_eq!(Amin, Amin_generated);
 
         let notes_of_c_major: Vec<LetterOctave> = [Letter::C, Letter::E, Letter::G]

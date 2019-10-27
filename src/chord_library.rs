@@ -27,7 +27,6 @@ pub fn generate_chords() -> Vec<ChordNote> {
         ("minor seventh", III, Min3rd),
         ("minor seventh", V, Per5th),
         ("minor seventh", VII, Min7th),
-        // Other 4-note chord
         ("major sixth", III, Maj3rd),
         ("major sixth", V, Per5th),
         ("major sixth", VI, Maj6th),

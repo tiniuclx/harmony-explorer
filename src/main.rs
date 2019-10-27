@@ -82,7 +82,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         match readline {
             Ok(line) => {
                 {
-                    use music_theory::{degrees::*, intervals::*};
+                    use music_theory::degree_intervals::*;
                     use pitch_calc::Letter;
                     use pitch_calc::LetterOctave;
 
@@ -91,7 +91,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
                     let c_maj = Chord {
                         root: LetterOctave(Letter::C, 4),
-                        quality: vec![(Maj3rd, III), (Per5th, V), (Maj6th, VI)],
+                        quality: vec![Maj3rd, Per5th, Maj6th],
                     };
 
                     c_maj.notes().into_iter().for_each(|n| {
