@@ -76,6 +76,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Audio initialisation is complete. Start processing keyboard input.
     let mut rl = Editor::<()>::new();
+    let db = database::initialise_database().unwrap();
+    chord_library::populate_database(&db);
 
     loop {
         let readline = rl.readline("♪♪♪ ");
