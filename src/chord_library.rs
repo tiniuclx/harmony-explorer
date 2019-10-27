@@ -5,34 +5,33 @@ use diesel::prelude::*;
 use diesel::sqlite::SqliteConnection;
 
 pub fn generate_chords() -> Vec<ChordNote> {
-    use degrees::*;
-    use intervals::*;
+    use degree_intervals::*;
     vec![
         // Triads
-        ("major", III, Maj3rd),
-        ("major", V, Per5th),
-        ("minor", III, Min3rd),
-        ("minor", V, Per5th),
-        ("diminished", III, Min3rd),
-        ("diminished", V, Dim5th),
-        ("augmented", III, Maj3rd),
-        ("augmented", V, Aug5th),
+        ("major", Maj3rd),
+        ("major", Per5th),
+        ("minor", Min3rd),
+        ("minor", Per5th),
+        ("diminished", Min3rd),
+        ("diminished", Dim5th),
+        ("augmented", Maj3rd),
+        ("augmented", Aug5th),
         // Tetrads
-        ("major seventh", III, Maj3rd),
-        ("major seventh", V, Per5th),
-        ("major seventh", VII, Maj7th),
-        ("dominant seventh", III, Maj3rd),
-        ("dominant seventh", V, Per5th),
-        ("dominant seventh", VII, Min7th),
-        ("minor seventh", III, Min3rd),
-        ("minor seventh", V, Per5th),
-        ("minor seventh", VII, Min7th),
-        ("major sixth", III, Maj3rd),
-        ("major sixth", V, Per5th),
-        ("major sixth", VI, Maj6th),
+        ("major seventh", Maj3rd),
+        ("major seventh", Per5th),
+        ("major seventh", Maj7th),
+        ("dominant seventh", Maj3rd),
+        ("dominant seventh", Per5th),
+        ("dominant seventh", Min7th),
+        ("minor seventh", Min3rd),
+        ("minor seventh", Per5th),
+        ("minor seventh", Min7th),
+        ("major sixth", Maj3rd),
+        ("major sixth", Per5th),
+        ("major sixth", Maj6th),
     ]
     .into_iter()
-    .map(|t| ChordNote::note(t.0, t.1, t.2))
+    .map(|t| ChordNote::note(t.0, (t.1).0, (t.1).1))
     .collect()
 }
 
