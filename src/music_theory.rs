@@ -6,6 +6,7 @@ use pitch_calc::letter_octave_from_step;
 // TODO: implement Display for interval
 pub type Interval = i32;
 #[allow(dead_code, non_upper_case_globals)]
+/// Helper module containing intervals, and their size in semitones.
 pub mod intervals {
     use super::*;
     pub const Root: Interval = 0;
@@ -26,6 +27,7 @@ pub mod intervals {
     pub const Octave: Interval = 12;
 }
 
+/// Transpose the note by the number of semitones in interval
 pub fn transpose(note: LetterOctave, interval: Interval) -> LetterOctave {
     let interval_s = interval as pitch_calc::calc::Step;
     let (letter, octave) = letter_octave_from_step(note.step() + interval_s);
@@ -35,6 +37,7 @@ pub fn transpose(note: LetterOctave, interval: Interval) -> LetterOctave {
 // TODO: implement Display for Degree
 pub type Degree = i32;
 #[allow(dead_code)]
+/// Helper module exporting constants for roman numeral chord and scale degrees.
 pub mod degrees {
     use super::*;
     pub const I: Degree = 1;
@@ -57,10 +60,8 @@ pub struct Chord {
 #[allow(dead_code)]
 impl Chord {
     pub fn transposed(&self, interval: Interval) -> Chord {
-        let transposed = self.root.step() + interval as f32;
-        let (letter, octave) = letter_octave_from_step(transposed);
         Chord {
-            root: LetterOctave(letter, octave),
+            root: transpose(self.root, interval),
             quality: self.quality.clone(),
         }
     }
