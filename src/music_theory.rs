@@ -6,7 +6,7 @@ use pitch_calc::letter_octave_from_step;
 // TODO: implement Display for interval
 pub type Interval = i32;
 #[allow(dead_code, non_upper_case_globals)]
-pub mod interval {
+pub mod intervals {
     use super::*;
     pub const Root: Interval = 0;
     pub const Min2nd: Interval = 1;
@@ -14,8 +14,11 @@ pub mod interval {
     pub const Min3rd: Interval = 3;
     pub const Maj3rd: Interval = 4;
     pub const Per4th: Interval = 5;
+
     pub const Dim5th: Interval = 6;
     pub const Per5th: Interval = 7;
+    pub const Aug5th: Interval = 8;
+
     pub const Min6th: Interval = 8;
     pub const Maj6th: Interval = 9;
     pub const Min7th: Interval = 10;
@@ -32,7 +35,7 @@ pub fn transpose(note: LetterOctave, interval: Interval) -> LetterOctave {
 // TODO: implement Display for Degree
 pub type Degree = i32;
 #[allow(dead_code)]
-pub mod degree {
+pub mod degrees {
     use super::*;
     pub const I: Degree = 1;
     pub const II: Degree = 2;
@@ -98,8 +101,8 @@ impl Chord {
     pub fn notes(&self) -> Vec<LetterOctave> {
         self.quality
             .clone()
-            .iter()
-            .map(|(i, _)| transpose(self.root, *i))
+            .into_iter()
+            .map(|(i, _)| transpose(self.root, i))
             .fold(vec![self.root()], |mut ns, n| {
                 ns.push(n);
                 ns
@@ -110,8 +113,8 @@ impl Chord {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use degree::*;
-    use interval::*;
+    use degrees::*;
+    use intervals::*;
 
     #[allow(unused_imports)]
     use pitch_calc::Letter::*;

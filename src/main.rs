@@ -12,6 +12,7 @@ extern crate rustyline;
 extern crate sample; // To convert portaudio sample buffers to frames.
 extern crate sampler;
 
+mod chord_library;
 mod database;
 mod music_theory;
 mod schema;
@@ -81,7 +82,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         match readline {
             Ok(line) => {
                 {
-                    use music_theory::{degree::*, interval::*};
+                    use music_theory::{degrees::*, intervals::*};
                     use pitch_calc::Letter;
                     use pitch_calc::LetterOctave;
 
@@ -93,7 +94,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                         quality: vec![(Maj3rd, III), (Per5th, V), (Maj6th, VI)],
                     };
 
-                    c_maj.notes().iter().for_each(|n| {
+                    c_maj.notes().into_iter().for_each(|n| {
                         sampler.note_on(n.to_hz(), vel);
                     });
                 }

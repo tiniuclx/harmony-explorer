@@ -12,6 +12,7 @@ extern crate rustyline;
 extern crate sample; // To convert portaudio sample buffers to frames.
 extern crate sampler;
 
+pub mod chord_library;
 pub mod database;
 pub mod music_theory;
 pub mod schema;

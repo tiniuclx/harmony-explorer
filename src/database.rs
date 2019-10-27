@@ -8,10 +8,20 @@ embed_migrations!("migrations/");
 
 #[derive(Debug, PartialEq, Eq, Queryable, Insertable)]
 #[table_name = "notes"]
-pub struct Note {
+pub struct ChordNote {
     pub chord: String,
     pub degree: Degree,
     pub interval: Interval,
+}
+
+impl ChordNote {
+    pub fn note(chord: &str, degree: Degree, interval: Interval) -> ChordNote {
+        ChordNote {
+            chord: chord.to_string(),
+            degree: degree,
+            interval: interval,
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Queryable, Insertable)]
@@ -19,6 +29,15 @@ pub struct Note {
 pub struct ChordName {
     pub chord: String,
     pub alternative_name: String,
+}
+
+impl ChordName {
+    pub fn name(chord: &str, alternative_name: &str) -> ChordName {
+        ChordName {
+            chord: chord.to_string(),
+            alternative_name: alternative_name.to_string(),
+        }
+    }
 }
 
 pub fn initialise_database() -> Result<SqliteConnection, Box<dyn std::error::Error>> {
@@ -32,17 +51,17 @@ mod tests {
     use super::*;
     #[test]
     fn insert() {
-        use degree::*;
-        use interval::*;
+        use degrees::*;
+        use intervals::*;
         let conn = initialise_database().unwrap();
 
         let inserted_notes = vec![
-            Note {
+            ChordNote {
                 chord: "maj".to_string(),
                 degree: III,
                 interval: Maj3rd,
             },
-            Note {
+            ChordNote {
                 chord: "maj".to_string(),
                 degree: V,
                 interval: Per5th,
@@ -75,11 +94,11 @@ mod tests {
     #[test]
     fn retrieve() {
         use super::*;
-        use degree::*;
-        use interval::*;
+        use degrees::*;
+        use intervals::*;
         let conn = initialise_database().unwrap();
 
-        let new_note = Note {
+        let new_note = ChordNote {
             chord: "maj".to_string(),
             degree: III,
             interval: Maj3rd,
@@ -95,7 +114,7 @@ mod tests {
 
         let retrieved_notes = notes::table
             .filter(notes::chord.eq("maj"))
-            .load::<Note>(&conn)
+            .load::<ChordNote>(&conn)
             .expect("Could not retrieve note");
 
         assert_eq!(retrieved_notes.len(), 1);
