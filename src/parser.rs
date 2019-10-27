@@ -48,7 +48,7 @@ named! { select_letter (&str) -> String,
     alt!(letter_accidental | letter_natural)
 }
 
-named! { letter (&str) -> Letter,
+named! { pub letter (&str) -> Letter,
     map_opt!(select_letter, |s: String| note_map().get(&s).map(|l| l.clone()))
 }
 

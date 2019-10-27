@@ -46,6 +46,21 @@ pub fn initialise_database() -> Result<SqliteConnection, Box<dyn std::error::Err
     Ok(connection)
 }
 
+pub fn get_quality(name: &str, conn: &SqliteConnection) -> Option<Quality> {
+    let quality = notes::table
+        .filter(notes::chord.eq(name.trim()))
+        .load::<ChordNote>(conn)
+        .ok()
+        .map(|ns| ns.into_iter().map(|n| (n.degree, n.interval)).collect());
+
+    // If the query returns no notes, that chord does not exist.
+    if quality == Some(vec![]) {
+        None
+    } else {
+        quality
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

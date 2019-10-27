@@ -79,6 +79,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Audio initialisation is complete. Start processing keyboard input.
     let mut rl = Editor::<()>::new();
+    if rl.load_history(".music_repl_history").is_err() {
+        // No previous history - that's okay!
+    }
     let db = database::initialise_database().unwrap();
     chord_library::populate_database(&db);
 
@@ -86,39 +89,53 @@ fn main() -> Result<(), Box<dyn Error>> {
         let readline = rl.readline("♪♪♪ ");
         match readline {
             Ok(line) => {
-                {
-                    use music_theory::degree_intervals::*;
-                    use pitch_calc::Letter;
-                    use pitch_calc::LetterOctave;
+                rl.add_history_entry(line.as_str());
+                // TODO: rip out the horrible rushed bodge that lies below,
+                // create an AST and act upon its results in the same way.
+                match parser::letter(&line) {
+                    Ok((quality, letter)) => {
+                        use database::*;
+                        use music_theory::*;
+                        let mut sampler = sampler_arc.lock().unwrap();
+                        let vel = 0.3;
+                        match get_quality(quality, &db) {
+                            Some(q) => {
+                                let retrieved_quality = q;
+                                let chord = Chord {
+                                    root: LetterOctave(letter, 4),
+                                    quality: retrieved_quality,
+                                };
+                                chord.notes().into_iter().for_each(|n| {
+                                    sampler.note_on(n.to_hz(), vel);
+                                });
 
-                    let mut sampler = sampler_arc.lock().unwrap();
-                    let vel = 0.3;
-
-                    let c_maj = Chord {
-                        root: LetterOctave(Letter::C, 4),
-                        quality: vec![Maj3rd, Per5th, Maj6th],
-                    };
-
-                    c_maj.notes().into_iter().for_each(|n| {
-                        sampler.note_on(n.to_hz(), vel);
-                    });
+                                println!("Playing {:?}", chord);
+                            }
+                            None => {
+                                println!("Could not find chord!");
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        println!("Parsing Error: {:?}", e);
+                    }
                 }
-                println!("{}", line);
             }
             Err(ReadlineError::Interrupted) => {
-                println!("CTRL-C");
+                println!("CTRL-C, exiting...");
                 break;
             }
             Err(ReadlineError::Eof) => {
-                println!("CTRL-D");
+                println!("CTRL-D, exiting...");
                 break;
             }
             Err(err) => {
-                println!("Error: {:?}", err);
+                println!("Input Error: {:?}", err);
                 break;
             }
         }
     }
+    rl.save_history(".music_repl_history").unwrap();
     stream.stop()?;
     stream.close()?;
     Ok(())
