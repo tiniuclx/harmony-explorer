@@ -2,6 +2,8 @@
 extern crate diesel;
 #[macro_use]
 extern crate diesel_migrations;
+extern crate nom;
+
 extern crate enum_primitive_derive;
 extern crate find_folder; // For easily finding the assets folder.
 extern crate gag;
@@ -15,6 +17,7 @@ extern crate sampler;
 mod chord_library;
 mod database;
 mod music_theory;
+mod parser;
 mod schema;
 
 use std::error::Error;
