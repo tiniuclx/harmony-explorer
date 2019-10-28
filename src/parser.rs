@@ -1,8 +1,36 @@
 use crate::music_theory::*;
+use nom::character::complete::{multispace0, not_line_ending};
 use nom::*;
 use std::collections::HashMap;
 
-#[allow(dead_code)]
+/// This is the abstract syntax tree of the REPL. It describes the syntax of
+/// every command that can be used.
+pub enum Commands {
+    /// Nothing at all was typed.
+    EmptyString,
+    /// A valid note letter followed by the chord quality.
+    Chord(Letter, String),
+}
+
+named! { letter_accidental (&str) -> String,
+    do_parse!(
+        letter: one_of!("ABCDEFG") >>
+        accidental: complete!(alt!(char!('#') | char!('b'))) >>
+        ( [letter, accidental].into_iter().collect() )
+    )
+}
+
+named! { letter_natural (&str) -> String,
+    do_parse!(
+        letter: one_of!("ABCDEFG") >>
+        ( letter.to_string() )
+    )
+}
+
+named! { select_letter (&str) -> String,
+    alt!(letter_accidental | letter_natural)
+}
+
 fn note_map() -> HashMap<String, Letter> {
     use Letter::*;
     [
@@ -29,27 +57,27 @@ fn note_map() -> HashMap<String, Letter> {
     .collect()
 }
 
-named! { letter_accidental (&str) -> String,
-    do_parse!(
-        letter: one_of!("ABCDEFG") >>
-        accidental: complete!(alt!(char!('#') | char!('b'))) >>
-        ( [letter, accidental].into_iter().collect() )
-    )
-}
-
-named! { letter_natural (&str) -> String,
-    do_parse!(
-        letter: one_of!("ABCDEFG") >>
-        ( letter.to_string() )
-    )
-}
-
-named! { select_letter (&str) -> String,
-    alt!(letter_accidental | letter_natural)
-}
-
 named! { pub letter (&str) -> Letter,
     map_opt!(select_letter, |s: String| note_map().get(&s).map(|l| l.clone()))
+}
+
+named! { command_chord (&str) -> Commands,
+    do_parse!(
+        letter: letter >>
+        chord: not_line_ending >>
+        (Commands::Chord(letter, chord.trim().to_string()))
+    )
+}
+
+named! { command_null (&str) -> Commands,
+    map!(multispace0, |_| Commands::EmptyString)
+}
+
+named! { pub parse_command (&str) -> Commands,
+    alt!(
+        command_chord |
+        command_null
+    )
 }
 
 #[cfg(test)]

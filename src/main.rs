@@ -125,9 +125,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+// TODO: rip out the horrible rushed bodge that lies below,
+// create an AST and act upon its results in the same way.
+// Ideally this function should be as small as possible -
+// all the work should be done in the functional core,
+// the command parser.
 fn execute_command(line: String, arc_sampler: &ArcSampler, db: &SqliteConnection) {
-    // TODO: rip out the horrible rushed bodge that lies below,
-    // create an AST and act upon its results in the same way.
     match parser::letter(&line) {
         Ok((quality, letter)) => {
             use database::*;
