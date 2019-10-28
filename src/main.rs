@@ -20,6 +20,7 @@ mod music_theory;
 mod parser;
 mod schema;
 
+use diesel::SqliteConnection;
 use std::error::Error;
 use std::sync::{Arc, Mutex};
 
@@ -37,9 +38,20 @@ const FRAMES_PER_BUFFER: u32 = 1024;
 //const THUMB_PIANO: &'static str = "thumbpiano A#3.wav";
 const CASIO_PIANO: &'static str = "Casio Piano C5.wav";
 
+type ArcSampler = Arc<
+    Mutex<
+        sampler::Sampler<
+            sampler::instrument::mode::Poly,
+            (),
+            Arc<sampler::audio::wav::Audio<[f32; 2]>>,
+        >,
+    >,
+>;
+
 fn main() -> Result<(), Box<dyn Error>> {
     // Initialise audio plumbing and sampler.
     // Suppress warnings from PortAudio
+    // TODO: route these to an error file for debugging
     let gag_stderr = Gag::stderr();
 
     // We'll create a sample map that maps a single sample to the entire note range.
@@ -50,13 +62,14 @@ fn main() -> Result<(), Box<dyn Error>> {
     let sample_map = sampler::Map::from_single_sample(sample);
 
     // Create atomic RC pointer to a mutex protecting the polyphonic sampler
-    let sampler_arc = Arc::new(Mutex::new(Sampler::poly((), sample_map).num_voices(12)));
+    let arc_sampler: ArcSampler =
+        Arc::new(Mutex::new(Sampler::poly((), sample_map).num_voices(12)));
 
     // Initialise PortAudio and create an output stream.
     let pa = pa::PortAudio::new()?;
     let settings =
         pa.default_output_stream_settings::<f32>(CHANNELS, SAMPLE_RATE, FRAMES_PER_BUFFER)?;
-    let sampler_arc_callback = sampler_arc.clone();
+    let sampler_arc_callback = arc_sampler.clone();
 
     // Callback is frequently called by PortAudio to fill the audio buffer with samples,
     // which generates sound. Do not do expensive or blocking things in this function!
@@ -90,36 +103,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         match readline {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
-                // TODO: rip out the horrible rushed bodge that lies below,
-                // create an AST and act upon its results in the same way.
-                match parser::letter(&line) {
-                    Ok((quality, letter)) => {
-                        use database::*;
-                        use music_theory::*;
-                        let mut sampler = sampler_arc.lock().unwrap();
-                        let vel = 0.3;
-                        match get_quality(quality, &db) {
-                            Some(q) => {
-                                let retrieved_quality = q;
-                                let chord = Chord {
-                                    root: LetterOctave(letter, 4),
-                                    quality: retrieved_quality,
-                                };
-                                chord.notes().into_iter().for_each(|n| {
-                                    sampler.note_on(n.to_hz(), vel);
-                                });
-
-                                println!("Playing {:?}", chord);
-                            }
-                            None => {
-                                println!("Could not find chord!");
-                            }
-                        }
-                    }
-                    Err(e) => {
-                        println!("Parsing Error: {:?}", e);
-                    }
-                }
+                execute_command(line, &arc_sampler, &db);
             }
             Err(ReadlineError::Interrupted) => {
                 println!("CTRL-C, exiting...");
@@ -139,4 +123,37 @@ fn main() -> Result<(), Box<dyn Error>> {
     stream.stop()?;
     stream.close()?;
     Ok(())
+}
+
+fn execute_command(line: String, arc_sampler: &ArcSampler, db: &SqliteConnection) {
+    // TODO: rip out the horrible rushed bodge that lies below,
+    // create an AST and act upon its results in the same way.
+    match parser::letter(&line) {
+        Ok((quality, letter)) => {
+            use database::*;
+            use music_theory::*;
+            let mut sampler = arc_sampler.lock().unwrap();
+            let vel = 0.3;
+            match get_quality(quality, &db) {
+                Some(q) => {
+                    let retrieved_quality = q;
+                    let chord = Chord {
+                        root: LetterOctave(letter, 4),
+                        quality: retrieved_quality,
+                    };
+                    chord.notes().into_iter().for_each(|n| {
+                        sampler.note_on(n.to_hz(), vel);
+                    });
+
+                    println!("Playing {:?}", chord);
+                }
+                None => {
+                    println!("Could not find chord!");
+                }
+            }
+        }
+        Err(e) => {
+            println!("Parsing Error: {:?}", e);
+        }
+    };
 }
