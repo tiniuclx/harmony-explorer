@@ -10,12 +10,16 @@ pub fn generate_chords() -> Vec<ChordNote> {
         // Triads
         ("major", Maj3rd),
         ("major", Per5th),
+        ("major", Octave),
         ("minor", Min3rd),
         ("minor", Per5th),
+        ("minor", Octave),
         ("diminished", Min3rd),
         ("diminished", Dim5th),
+        ("diminished", Octave),
         ("augmented", Maj3rd),
         ("augmented", Aug5th),
+        ("augmented", Octave),
         // Tetrads
         ("major seventh", Maj3rd),
         ("major seventh", Per5th),
