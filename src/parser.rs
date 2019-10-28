@@ -1,10 +1,11 @@
 use crate::music_theory::*;
-use nom::character::complete::{multispace0, not_line_ending};
+use nom::character::complete::not_line_ending;
 use nom::*;
 use std::collections::HashMap;
 
 /// This is the abstract syntax tree of the REPL. It describes the syntax of
 /// every command that can be used.
+#[derive(Debug, PartialEq, Eq)]
 pub enum Command {
     /// Nothing at all was typed.
     EmptyString,
@@ -70,13 +71,13 @@ named! { command_chord (&str) -> Command,
 }
 
 named! { command_null (&str) -> Command,
-    map!(multispace0, |_| Command::EmptyString)
+    map!(eof!(), |_| Command::EmptyString)
 }
 
 named! { pub parse_command (&str) -> Command,
     alt!(
-        command_chord |
-        command_null
+        command_null |
+        command_chord
     )
 }
 
@@ -108,5 +109,14 @@ mod tests {
         assert_eq!(letter(""), Err(Incomplete(Size(1))));
         assert_ne!(letter("Db"), Ok(("", D)));
         assert_ne!(letter("E#"), Ok(("", F)));
+    }
+
+    #[test]
+    fn command_null() {
+        assert_eq!(parse_command(""), Ok(("", Command::EmptyString)));
+        assert_ne!(
+            parse_command("asdfasdf"),
+            Ok(("asdfasdf", Command::EmptyString))
+        );
     }
 }
