@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 /// This is the abstract syntax tree of the REPL. It describes the syntax of
 /// every command that can be used.
-pub enum Commands {
+pub enum Command {
     /// Nothing at all was typed.
     EmptyString,
     /// A valid note letter followed by the chord quality.
@@ -61,19 +61,19 @@ named! { pub letter (&str) -> Letter,
     map_opt!(select_letter, |s: String| note_map().get(&s).map(|l| l.clone()))
 }
 
-named! { command_chord (&str) -> Commands,
+named! { command_chord (&str) -> Command,
     do_parse!(
         letter: letter >>
         chord: not_line_ending >>
-        (Commands::Chord(letter, chord.trim().to_string()))
+        (Command::Chord(letter, chord.trim().to_string()))
     )
 }
 
-named! { command_null (&str) -> Commands,
-    map!(multispace0, |_| Commands::EmptyString)
+named! { command_null (&str) -> Command,
+    map!(multispace0, |_| Command::EmptyString)
 }
 
-named! { pub parse_command (&str) -> Commands,
+named! { pub parse_command (&str) -> Command,
     alt!(
         command_chord |
         command_null

@@ -30,7 +30,7 @@ use rustyline::Editor;
 use gag::Gag;
 use sampler::Sampler;
 
-use music_theory::Chord;
+use parser::{parse_command, Command};
 
 const CHANNELS: i32 = 2;
 const SAMPLE_RATE: f64 = 44_100.0;
@@ -103,7 +103,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         match readline {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
-                execute_command(line, &arc_sampler, &db);
+                match parse_command(&line) {
+                    Ok(("", command)) => execute(command, &arc_sampler, &db),
+                    Ok((remaining, command)) => {
+                        execute(command, &arc_sampler, &db);
+                        println!("Warning: could not process input: {}", remaining);
+                    }
+                    Err(e) => println!("Error encountered while parsing command: {:?}", e),
+                }
             }
             Err(ReadlineError::Interrupted) => {
                 println!("CTRL-C, exiting...");
@@ -125,19 +132,18 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-// TODO: rip out the horrible rushed bodge that lies below,
-// create an AST and act upon its results in the same way.
 // Ideally this function should be as small as possible -
 // all the work should be done in the functional core,
-// the command parser.
-fn execute_command(line: String, arc_sampler: &ArcSampler, db: &SqliteConnection) {
-    match parser::letter(&line) {
-        Ok((quality, letter)) => {
+// the command parser. All this function must do is
+// glue the different modules together
+fn execute(command: Command, arc_sampler: &ArcSampler, db: &SqliteConnection) {
+    match command {
+        Command::Chord(letter, quality) => {
             use database::*;
             use music_theory::*;
             let mut sampler = arc_sampler.lock().unwrap();
             let vel = 0.3;
-            match get_quality(quality, &db) {
+            match get_quality(&quality, &db) {
                 Some(q) => {
                     let retrieved_quality = q;
                     let chord = Chord {
@@ -155,8 +161,6 @@ fn execute_command(line: String, arc_sampler: &ArcSampler, db: &SqliteConnection
                 }
             }
         }
-        Err(e) => {
-            println!("Parsing Error: {:?}", e);
-        }
+        Command::EmptyString => println!("TODO: redo last working command, or print newline"),
     };
 }
