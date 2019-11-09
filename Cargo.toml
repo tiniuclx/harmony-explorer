@@ -1,5 +1,5 @@
 [package]
-name = "guitar-tool"
+name = "harmony-explorer"
 version = "0.1.0"
 authors = ["Alexandru Tiniuc <tiniuc.alexandru@gmail.com>"]
 edition = "2018"
