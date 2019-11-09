@@ -220,7 +220,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "guitar-tool"
+name = "harmony-explorer"
 version = "0.1.0"
 dependencies = [
  "diesel 1.4.3 (registry+https://github.com/rust-lang/crates.io-index)",

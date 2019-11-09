@@ -48,6 +48,7 @@ pub fn generate_names() -> Vec<ChordName> {
         ("diminished", "dim"),
         ("diminished", "o"),
         ("augmented", "+"),
+        ("augmented", "aug"),
         ("major seventh", "M7"),
         ("major seventh", "maj7"),
         ("dominant seventh", "7"),

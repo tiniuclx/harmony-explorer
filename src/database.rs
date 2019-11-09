@@ -47,14 +47,29 @@ pub fn initialise_database() -> Result<SqliteConnection, Box<dyn std::error::Err
 }
 
 pub fn get_quality(name: &str, conn: &SqliteConnection) -> Option<Quality> {
+    // Search for the full name in the abbreviations table
+    let primary_name = names::table
+        .filter(names::alternative_name.eq(name.trim()))
+        .limit(1)
+        .select(names::chord)
+        .load::<String>(conn)
+        .ok()?;
+
+    // If the full name was found, use that. Otherwise, use the given name.
+    let searched_name: String;
+    match primary_name.as_slice() {
+        [found_name] => searched_name = found_name.clone(),
+        [] => searched_name = name.trim().to_owned(),
+        _ => return None,
+    };
+
     let quality = notes::table
-        .filter(notes::chord.eq(name.trim()))
+        .filter(notes::chord.eq(searched_name))
         .load::<ChordNote>(conn)
         .ok()
         .map(|ns| ns.into_iter().map(|n| (n.degree, n.interval)).collect());
 
-    // If the query returns no notes, the chord may still be found in the
-    // alternative name table.
+    // If the query returns no notes, the chord does not exist!
     if quality == Some(vec![]) {
         None
     } else {

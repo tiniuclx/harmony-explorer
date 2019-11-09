@@ -1,7 +1,7 @@
 table! {
     names (chord) {
         chord -> Text,
-        alternative_name -> Nullable<Text>,
+        alternative_name -> Text,
     }
 }
 
@@ -13,7 +13,4 @@ table! {
     }
 }
 
-allow_tables_to_appear_in_same_query!(
-    names,
-    notes,
-);
+allow_tables_to_appear_in_same_query!(names, notes,);
