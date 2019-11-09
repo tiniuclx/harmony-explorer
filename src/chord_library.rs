@@ -33,6 +33,9 @@ pub fn generate_chords() -> Vec<ChordNote> {
         ("major sixth", Maj3rd),
         ("major sixth", Per5th),
         ("major sixth", Maj6th),
+        ("diminished seventh", Min3rd),
+        ("diminished seventh", Dim5th),
+        ("diminished seventh", Dim7th),
     ]
     .into_iter()
     .map(|t| ChordNote::note(t.0, (t.1).0, (t.1).1))
@@ -55,6 +58,8 @@ pub fn generate_names() -> Vec<ChordName> {
         ("minor seventh", "m7"),
         ("major sixth", "6"),
         ("major sixth", "maj6"),
+        ("diminished seventh", "dim7"),
+        ("diminished seventh", "o7"),
     ]
     .into_iter()
     .map(|t| ChordName::name(t.0, t.1))

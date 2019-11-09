@@ -37,8 +37,10 @@ pub mod intervals {
 
     pub const Min6th: Interval = 8;
     pub const Maj6th: Interval = 9;
+    pub const Dim7th: Interval = 9;
     pub const Min7th: Interval = 10;
     pub const Maj7th: Interval = 11;
+
     pub const Octave: Interval = 12;
 }
 
@@ -64,6 +66,7 @@ pub mod degree_intervals {
     pub const Min6th: (Degree, Interval) = (VI, intervals::Min6th);
     pub const Maj6th: (Degree, Interval) = (VI, intervals::Maj6th);
 
+    pub const Dim7th: (Degree, Interval) = (VII, intervals::Dim7th);
     pub const Min7th: (Degree, Interval) = (VII, intervals::Min7th);
     pub const Maj7th: (Degree, Interval) = (VII, intervals::Maj7th);
 
