@@ -7,6 +7,6 @@ CREATE TABLE notes (
 ) WITHOUT ROWID;
 
 CREATE TABLE names (
-    chord TEXT PRIMARY KEY,
-    alternative_name TEXT
+    chord TEXT,
+    alternative_name TEXT PRIMARY KEY
 ) WITHOUT ROWID;

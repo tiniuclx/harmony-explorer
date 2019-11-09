@@ -53,7 +53,8 @@ pub fn get_quality(name: &str, conn: &SqliteConnection) -> Option<Quality> {
         .ok()
         .map(|ns| ns.into_iter().map(|n| (n.degree, n.interval)).collect());
 
-    // If the query returns no notes, that chord does not exist.
+    // If the query returns no notes, the chord may still be found in the
+    // alternative name table.
     if quality == Some(vec![]) {
         None
     } else {

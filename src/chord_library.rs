@@ -39,9 +39,35 @@ pub fn generate_chords() -> Vec<ChordNote> {
     .collect()
 }
 
+pub fn generate_names() -> Vec<ChordName> {
+    vec![
+        ("major", ""),
+        ("major", "maj"),
+        ("minor", "m"),
+        ("minor", "-"),
+        ("diminished", "dim"),
+        ("diminished", "o"),
+        ("augmented", "+"),
+        ("major seventh", "M7"),
+        ("major seventh", "maj7"),
+        ("dominant seventh", "7"),
+        ("minor seventh", "m7"),
+        ("major sixth", "6"),
+        ("major sixth", "maj6"),
+    ]
+    .into_iter()
+    .map(|t| ChordName::name(t.0, t.1))
+    .collect()
+}
+
 pub fn populate_database(db: &SqliteConnection) {
     diesel::insert_into(notes::table)
         .values(generate_chords())
+        .execute(db)
+        .unwrap();
+
+    diesel::insert_into(names::table)
+        .values(generate_names())
         .execute(db)
         .unwrap();
 }
