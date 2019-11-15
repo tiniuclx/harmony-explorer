@@ -154,7 +154,7 @@ fn execute(command: Command, arc_sampler: &ArcSampler, db: &SqliteConnection) {
                         sampler.note_on(n.to_hz(), vel);
                     });
 
-                    println!("Playing {:?}", chord);
+                    println!("Playing {}", chord);
                 }
                 None => {
                     println!("Could not find chord!");

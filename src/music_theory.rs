@@ -155,6 +155,73 @@ impl Chord {
     }
 }
 
+static mut use_flats: bool = false;
+
+pub fn set_use_flats(flats: bool) {
+    unsafe {
+        use_flats = flats;
+    }
+}
+
+pub fn get_use_flats() -> bool {
+    use_flats
+}
+
+pub fn letter_to_string(letter: Letter) -> String {
+    use pitch_calc::Letter::*;
+    let flats = get_use_flats();
+    let s = match letter {
+        C => "C",
+        D => "D",
+        E => "E",
+        F => "F",
+        G => "G",
+        A => "A",
+        B => "B",
+
+        Db | Csh => {
+            if flats {
+                "Db"
+            } else {
+                "C#"
+            }
+        }
+
+        Eb | Dsh => {
+            if flats {
+                "Eb"
+            } else {
+                "D#"
+            }
+        }
+
+        Gb | Fsh => {
+            if flats {
+                "Gb"
+            } else {
+                "F#"
+            }
+        }
+
+        Ab | Gsh => {
+            if flats {
+                "Ab"
+            } else {
+                "G#"
+            }
+        }
+
+        Bb | Ash => {
+            if flats {
+                "Bb"
+            } else {
+                "A#"
+            }
+        }
+    };
+    s.to_string()
+}
+
 impl fmt::Display for Chord {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
