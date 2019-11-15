@@ -1,5 +1,5 @@
-pub use pitch_calc::Letter;
-pub use pitch_calc::{LetterOctave, Step};
+pub use pitch_calc::{Letter, LetterOctave, Step};
+use std::fmt;
 
 use pitch_calc::letter_octave_from_step;
 
@@ -75,13 +75,15 @@ pub mod degree_intervals {
 
 pub type Quality = Vec<(Degree, Interval)>;
 
+/// Chords are composed of the root tone, followed by a list of notes
+/// and their scale degrees.
 #[derive(PartialEq, Eq, Debug)]
 pub struct Chord {
     pub root: LetterOctave,
     pub quality: Quality,
 }
 
-/// Transpose the note by the number of semitones in interval
+/// Transpose the note by the number of semitones in `interval`.
 pub fn transpose(note: LetterOctave, interval: Interval) -> LetterOctave {
     let interval_s = interval as pitch_calc::calc::Step;
     let (letter, octave) = letter_octave_from_step(note.step() + interval_s);
@@ -90,6 +92,7 @@ pub fn transpose(note: LetterOctave, interval: Interval) -> LetterOctave {
 
 #[allow(dead_code)]
 impl Chord {
+    /// Returns a new chord, transposed by `interval`.
     pub fn transposed(&self, interval: Interval) -> Chord {
         Chord {
             root: transpose(self.root, interval),
@@ -97,10 +100,13 @@ impl Chord {
         }
     }
 
+    /// Returns the root note of the chord.
     pub fn root(&self) -> LetterOctave {
         self.root
     }
 
+    /// Returns a new chord with the same quality but with a different root,
+    /// determined by `new_root`.
     pub fn with_root(&self, new_root: LetterOctave) -> Chord {
         Chord {
             root: new_root,
@@ -108,10 +114,14 @@ impl Chord {
         }
     }
 
+    /// Returns the `Letter` of the root.
     pub fn root_letter(&self) -> Letter {
         self.root.letter()
     }
 
+    /// Returns a new chord with the same quality but with a different root,
+    /// determined by `new_root`. The new chord will be voiced in the same
+    /// octave as the old one.
     pub fn with_root_letter(&self, new_root: Letter) -> Chord {
         Chord {
             root: LetterOctave(new_root, self.root.octave()),
@@ -119,10 +129,12 @@ impl Chord {
         }
     }
 
+    /// Returns a copy of the chord's Quality.
     pub fn quality(&self) -> Quality {
         self.quality.clone()
     }
 
+    /// Returns a new chord with the same root, but a different `quality`.
     pub fn with_quality(&self, quality: Quality) -> Chord {
         Chord {
             root: self.root,
@@ -130,6 +142,7 @@ impl Chord {
         }
     }
 
+    /// Returns all of the notes that make up the chord.
     pub fn notes(&self) -> Vec<LetterOctave> {
         self.quality
             .clone()
@@ -139,6 +152,12 @@ impl Chord {
                 ns.push(n);
                 ns
             })
+    }
+}
+
+impl fmt::Display for Chord {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 
