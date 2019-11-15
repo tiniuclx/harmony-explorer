@@ -155,16 +155,16 @@ impl Chord {
     }
 }
 
-static mut use_flats: bool = false;
+static mut USE_FLATS: bool = true;
 
 pub fn set_use_flats(flats: bool) {
     unsafe {
-        use_flats = flats;
+        USE_FLATS = flats;
     }
 }
 
 pub fn get_use_flats() -> bool {
-    use_flats
+    unsafe { USE_FLATS }
 }
 
 pub fn letter_to_string(letter: Letter) -> String {
@@ -224,7 +224,14 @@ pub fn letter_to_string(letter: Letter) -> String {
 
 impl fmt::Display for Chord {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self)
+        let notes = self.notes();
+
+        let output: String = notes
+            .into_iter()
+            .map(|t| format!("{}{} ", letter_to_string(t.letter()), t.octave()))
+            .collect();
+
+        write!(f, "{}", output.trim())
     }
 }
 
