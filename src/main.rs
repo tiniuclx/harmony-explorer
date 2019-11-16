@@ -28,6 +28,7 @@ use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
 use gag::Gag;
+use music_theory::set_use_flats;
 use sampler::Sampler;
 
 use parser::{parse_command, Command};
@@ -161,6 +162,16 @@ fn execute(command: Command, arc_sampler: &ArcSampler, db: &SqliteConnection) {
                 }
             }
         }
-        Command::EmptyString => println!("TODO: redo last working command, or print newline"),
+        Command::EmptyString => (),
+
+        Command::Flats => {
+            set_use_flats(true);
+            println!("Notating accidentals using flats.")
+        }
+
+        Command::Sharps => {
+            set_use_flats(false);
+            println!("Notating accidentals using sharps.")
+        }
     };
 }

@@ -11,7 +11,13 @@ pub enum Command {
     EmptyString,
     /// A valid note letter followed by the chord quality.
     Chord(Letter, String),
+    /// The word "sharps"
+    Sharps,
+    /// The word "flats"
+    Flats,
 }
+
+// Parsers & sub-parsers for Chord.
 
 named! { letter_accidental (&str) -> String,
     do_parse!(
@@ -70,13 +76,39 @@ named! { command_chord (&str) -> Command,
     )
 }
 
+// Parser for the empty string.
 named! { command_null (&str) -> Command,
     map!(eof!(), |_| Command::EmptyString)
 }
 
+// Parsers for the sharps and flats commands
+
+named! {command_sharps (&str) -> Command,
+    map!(
+        alt!(
+            tag!("sharps") |
+            tag!("sharp")
+        ),
+        |_| Command::Sharps
+    )
+}
+
+named! {command_flats (&str) -> Command,
+    map!(
+        alt!(
+            tag!("flats") |
+            tag!("flat")
+        ),
+        |_| Command::Flats
+    )
+}
+
+// Top-level parser, containing the entire command syntax.
 named! { pub parse_command (&str) -> Command,
     alt!(
         command_null |
+        command_flats |
+        command_sharps |
         command_chord
     )
 }
@@ -118,5 +150,11 @@ mod tests {
             parse_command("asdfasdf"),
             Ok(("asdfasdf", Command::EmptyString))
         );
+    }
+
+    #[test]
+    fn command_accidentals() {
+        assert_eq!(parse_command("sharps"), Ok(("", Command::Sharps)));
+        assert_eq!(parse_command("flat"), Ok(("", Command::Flats)));
     }
 }
