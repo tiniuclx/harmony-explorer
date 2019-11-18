@@ -96,8 +96,14 @@ fn main() -> Result<(), Box<dyn Error>> {
     if rl.load_history(".music_repl_history").is_err() {
         // No previous history - that's okay!
     }
+
+    // In-memory SQLite database of chords
     let db = database::initialise_database().unwrap();
     chord_library::populate_database(&db);
+
+    // The last non-empty command is stored here, to be executed again
+    // based on user input.
+    let mut last_command: Option<Command> = None;
 
     loop {
         let readline = rl.readline("♪♪♪ ");
@@ -105,10 +111,17 @@ fn main() -> Result<(), Box<dyn Error>> {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
                 match parse_command(&line) {
-                    Ok(("", command)) => execute(command, &arc_sampler, &db),
-                    Ok((remaining, command)) => {
-                        execute(command, &arc_sampler, &db);
-                        println!("Warning: could not process input: {}", remaining);
+                    Ok(("", command)) => {
+                        // Act based on the received command, and save it if it
+                        // is not empty.
+                        execute(&command, &last_command, &arc_sampler, &db);
+                        if command != Command::EmptyString {
+                            last_command = Some(command);
+                        }
+                    }
+                    Ok((remaining, _)) => {
+                        // Should not get here, the parser should consume all input
+                        println!("Could not process input: {}", remaining);
                     }
                     Err(e) => println!("Error encountered while parsing command: {:?}", e),
                 }
@@ -137,8 +150,15 @@ fn main() -> Result<(), Box<dyn Error>> {
 // all the work should be done in the functional core,
 // the command parser. All this function must do is
 // glue the different modules together
-fn execute(command: Command, arc_sampler: &ArcSampler, db: &SqliteConnection) {
+fn execute(
+    command: &Command,
+    last_command: &Option<Command>,
+    arc_sampler: &ArcSampler,
+    db: &SqliteConnection,
+) {
     match command {
+        // Look up the chord quality in the database, play it and
+        // print its notes.
         Command::Chord(letter, quality) => {
             use database::*;
             use music_theory::*;
@@ -148,7 +168,7 @@ fn execute(command: Command, arc_sampler: &ArcSampler, db: &SqliteConnection) {
                 Some(q) => {
                     let retrieved_quality = q;
                     let chord = Chord {
-                        root: LetterOctave(letter, 4),
+                        root: LetterOctave(*letter, 4),
                         quality: retrieved_quality,
                     };
                     chord.notes().into_iter().for_each(|n| {
@@ -162,7 +182,12 @@ fn execute(command: Command, arc_sampler: &ArcSampler, db: &SqliteConnection) {
                 }
             }
         }
-        Command::EmptyString => (),
+        // Re-do the last command.
+        Command::EmptyString => match last_command {
+            Some(Command::EmptyString) => (),
+            Some(c) => execute(&c, &None, arc_sampler, db),
+            None => (),
+        },
 
         Command::Flats => {
             set_use_flats(true);

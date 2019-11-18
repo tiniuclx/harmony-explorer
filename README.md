@@ -26,10 +26,6 @@ Playing Bb4 Db5 F5 Bb5
 Playing Bb4 Db5 F5 Bb5
 ```
 
-- Command history support: use the up- and down-arrow keys to navigate
-  through your previous commands. The commands are remembered after you close
-  the program.
-
 - Choose whether to display accidentals using sharps or flats.
 ```
 ♪♪♪ F#dim
@@ -39,6 +35,12 @@ Notating accidentals using sharps.
 ♪♪♪ F#dim
 Playing F#4 A4 C5 F#5
 ```
+- Command history support: use the up- and down-arrow keys to navigate
+  through your previous commands. The commands are remembered after you close
+  the program.
+
+- Press Enter to re-do the last command. Useful if you want to hear the chord
+  that was last played without having to type it again.
 
 ## Building from source
 
