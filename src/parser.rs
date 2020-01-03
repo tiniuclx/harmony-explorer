@@ -15,6 +15,8 @@ pub enum Command {
     Sharps,
     /// The word "flats"
     Flats,
+    // The word "transpose", followed by a signed integer, followed by a chord
+    //Transpose(i32, Letter, String),
 }
 
 // Parsers & sub-parsers for Chord.
@@ -86,8 +88,8 @@ named! { command_null (&str) -> Command,
 named! {command_sharps (&str) -> Command,
     map!(
         alt!(
-            tag!("sharps") |
-            tag!("sharp")
+            complete!(tag!("sharps")) |
+            complete!(tag!("sharp"))
         ),
         |_| Command::Sharps
     )
@@ -96,8 +98,8 @@ named! {command_sharps (&str) -> Command,
 named! {command_flats (&str) -> Command,
     map!(
         alt!(
-            tag!("flats") |
-            tag!("flat")
+            complete!(tag!("flats")) |
+            complete!(tag!("flat"))
         ),
         |_| Command::Flats
     )
