@@ -191,12 +191,16 @@ fn execute(
 
         Command::Flats => {
             set_use_flats(true);
-            println!("Notating accidentals using flats.")
+            println!("Notating accidentals using flats.");
         }
 
         Command::Sharps => {
             set_use_flats(false);
-            println!("Notating accidentals using sharps.")
+            println!("Notating accidentals using sharps.");
+        }
+
+        Command::Transpose(distance, letter, quality) => {
+            println!("Transposing {:?}, {:?}, {:?}", distance, letter, quality);
         }
     };
 }

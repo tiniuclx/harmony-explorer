@@ -2,6 +2,7 @@ use crate::music_theory::*;
 use nom::character::complete::not_line_ending;
 use nom::*;
 use std::collections::HashMap;
+use std::str::FromStr;
 
 /// This is the abstract syntax tree of the REPL. It describes the syntax of
 /// every command that can be used.
@@ -15,8 +16,8 @@ pub enum Command {
     Sharps,
     /// The word "flats"
     Flats,
-    // The word "transpose", followed by a signed integer, followed by a chord
-    //Transpose(i32, Letter, String),
+    /// The word "transpose", followed by a signed integer, followed by a chord
+    Transpose(i32, Letter, String),
 }
 
 // Parsers & sub-parsers for Chord.
@@ -105,12 +106,29 @@ named! {command_flats (&str) -> Command,
     )
 }
 
+named! { parse_signed_i32 (&str) -> i32,
+    map_res!(
+        recognize!(tuple!(opt!(char!('-')), nom::character::complete::digit1)),
+        i32::from_str)
+}
+
+named! { command_transpose (&str) -> Command,
+    do_parse!(
+        _tag: ws!(alt!(tag!("transpose") | tag!("t"))) >>
+        distance: ws!(parse_signed_i32) >>
+        letter: ws!(letter) >>
+        chord: not_line_ending >>
+        (Command::Transpose(distance, letter, chord.trim().to_string()))
+    )
+}
+
 // Top-level parser, containing the entire command syntax.
 named! { pub parse_command (&str) -> Command,
     alt!(
         command_null |
         command_flats |
         command_sharps |
+        command_transpose |
         command_chord
     )
 }
@@ -158,5 +176,23 @@ mod tests {
     fn command_accidentals() {
         assert_eq!(parse_command("sharps"), Ok(("", Command::Sharps)));
         assert_eq!(parse_command("flat"), Ok(("", Command::Flats)));
+    }
+
+    #[test]
+    fn command_transpose() {
+        assert_eq!(
+            parse_command("transpose 5 C#maj7"),
+            Ok(("", Command::Transpose(5, Csh, "maj7".to_owned())))
+        );
+
+        assert_eq!(
+            parse_command("transpose -7 C#maj7"),
+            Ok(("", Command::Transpose(-7, Csh, "maj7".to_owned())))
+        );
+
+        assert_eq!(
+            parse_command("t -7 C#maj7"),
+            Ok(("", Command::Transpose(-7, Csh, "maj7".to_owned())))
+        );
     }
 }
