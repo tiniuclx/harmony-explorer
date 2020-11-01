@@ -26,7 +26,6 @@ use std::sync::{Arc, Mutex};
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
-use music_theory::set_use_flats;
 use sampler::Sampler;
 
 use parser::{parse_command, Command};
