@@ -1,6 +1,6 @@
 use crate::music_theory::*;
-use nom::character::complete::not_line_ending;
 use nom::character::complete::multispace0;
+use nom::character::complete::not_line_ending;
 use nom::*;
 use std::collections::HashMap;
 use std::str::FromStr;
@@ -115,7 +115,7 @@ named! { parse_signed_i32 (&str) -> i32,
 
 named! { command_transpose (&str) -> Command,
     do_parse!(
-        _tag: alt!(tag!("transpose") | tag!("t")) >>
+        alt!(tag!("transpose") | tag!("t")) >>
         multispace0 >>
         distance: parse_signed_i32 >>
         multispace0 >>
@@ -141,8 +141,8 @@ mod tests {
     use super::*;
     use nom::Err::*;
     use nom::Needed::*;
-    use Letter::*;
     use std::num::*;
+    use Letter::*;
 
     #[test]
     fn letter_naturals() {
@@ -151,7 +151,10 @@ mod tests {
         assert_eq!(letter("E"), Ok(("", E)));
         assert_eq!(letter("E7b5"), Ok(("7b5", E)));
 
-        assert_eq!(letter(""), Err(Incomplete(Size(NonZeroUsize::new(1).unwrap()))));
+        assert_eq!(
+            letter(""),
+            Err(Incomplete(Size(NonZeroUsize::new(1).unwrap())))
+        );
         assert_ne!(letter("a"), Ok(("", A)));
     }
 
@@ -162,7 +165,10 @@ mod tests {
         assert_eq!(letter("G#"), Ok(("", Gsh)));
         assert_eq!(letter("Bb7add9"), Ok(("7add9", Bb)));
 
-        assert_eq!(letter(""), Err(Incomplete(Size(NonZeroUsize::new(1).unwrap()))));
+        assert_eq!(
+            letter(""),
+            Err(Incomplete(Size(NonZeroUsize::new(1).unwrap())))
+        );
         assert_ne!(letter("Db"), Ok(("", D)));
         assert_ne!(letter("E#"), Ok(("", F)));
     }
