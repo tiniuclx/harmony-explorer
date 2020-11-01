@@ -154,7 +154,7 @@ fn execute(
         Command::Chord(letter, quality) => {
             use database::*;
             let mut sampler = arc_sampler.lock().unwrap();
-            let vel = 0.3;
+            let vel = 0.6;
             match get_quality(&quality, &db) {
                 Some(q) => {
                     let retrieved_quality = q;

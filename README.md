@@ -7,23 +7,36 @@ chord and Harmony Explorer plays it for you!
 - Hear any commonly used chord and see the notes the chord is composed of.
 ```
 ♪♪♪ C
-Playing C4 E4 G4 C5
+Playing C4 E4 G4
 ♪♪♪ Bdim
-Playing B4 D5 F5 B5
+Playing B4 D5 F5
 ♪♪♪ G7
 Playing G4 B4 D5 F5
 ♪♪♪ Am
-Playing A4 C5 E5 A5
+Playing A4 C5 E5
 ```
 
 - Use several commonly used names for each chord.
 ```
 ♪♪♪ Bbm
-Playing Bb4 Db5 F5 Bb5
+Playing Bb4 Db5 F5
 ♪♪♪ Bb-
-Playing Bb4 Db5 F5 Bb5
+Playing Bb4 Db5 F5
 ♪♪♪ Bb minor
-Playing Bb4 Db5 F5 Bb5
+Playing Bb4 Db5 F5
+```
+
+- Transpose chords up or down
+```
+♪♪♪ transpose 5 Cmaj7
+Fmaj7
+Playing F4 A4 C5 E5
+♪♪♪ transpose -5 Cmaj7
+Gmaj7
+Playing G4 B4 D5 Gb5
+♪♪♪ t 5 Cmaj7
+Fmaj7
+Playing F4 A4 C5 E5
 ```
 
 - Choose whether to display accidentals using sharps or flats.
