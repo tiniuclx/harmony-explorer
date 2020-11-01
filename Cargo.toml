@@ -12,6 +12,7 @@ num = "0.2.0"
 num-traits ="0.2.8"
 pitch_calc = "0.11.1"
 enum-primitive-derive = "0.1.2"
+libsqlite3-sys = { version = ">=0.8.0, <0.13.0", features = ["bundled"] }
 diesel = {version = "1.4.3", features = ["sqlite"]}
 diesel_migrations = "1.4.0"
 # REPL
@@ -22,4 +23,3 @@ sampler = "0.2.0"
 find_folder = "0.3.0"
 portaudio = "0.7.0"
 sample = "0.10.0"
-gag = "0.1.10"

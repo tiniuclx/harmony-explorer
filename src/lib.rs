@@ -4,7 +4,6 @@ extern crate diesel;
 extern crate diesel_migrations;
 extern crate enum_primitive_derive;
 extern crate find_folder; // For easily finding the assets folder.
-extern crate gag;
 extern crate nom;
 extern crate num_traits;
 extern crate pitch_calc; // To work with musical notes.

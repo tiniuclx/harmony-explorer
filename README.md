@@ -48,7 +48,7 @@ First, you must install several dependencies in order to build and run the
 project.
 
 ### Ubuntu & Debian:
-`sudo apt-get install git libasound2-dev libsqlite-dev`
+`sudo apt-get install git libasound2-dev`
 
 You will also need to install the Rust compiler. Instructions for doing so
 [can be found here.](https://www.rust-lang.org/tools/install)
@@ -68,3 +68,29 @@ cd harmony-explorer
 cargo run
 ```
 
+### Windows
+
+For Windows, you will have to build `portaudio` manually. For this, you will
+need CMake and Visual Studio Build Tools. Once you've downloaded the
+`portaudio` source, configure it to build using Visual Studio. You can then
+build it by running the folliwing inside a Windows developer shell:
+
+```MSBuild.exe .\portaudio.sln /property:Configuration=Release```
+
+Once the command finishes, the output can be found inside the `Release`
+folder within your build directory.
+
+You will also need to tell the linker where to find the library. There should
+be a way to do this more cleanly, but I did not find it yet. Something like
+[this
+answer](https://stackoverflow.com/questions/43826572/where-should-i-place-a-static-library-so-i-can-link-it-with-a-rust-program)
+should do the trick, but this didn't really work, or I did it incorrectly.
+
+
+Copy the generated files into the `/LIBPATH` passed to the link command. In my case,
+this is:
+```path
+C:\Users\tiniu\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\lib
+```
+The linker expects to find `portaudio.lib`, so you will also have to rename
+all the files to remove "_x64": `portaudio_x64.lib` shall become `portaudio.lib` and so on. 

@@ -6,7 +6,6 @@ extern crate nom;
 
 extern crate enum_primitive_derive;
 extern crate find_folder; // For easily finding the assets folder.
-extern crate gag;
 extern crate num_traits;
 extern crate pitch_calc as pitch; // To work with musical notes.
 extern crate portaudio as pa; // For audio I/O
@@ -27,7 +26,6 @@ use std::sync::{Arc, Mutex};
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
-use gag::Gag;
 use music_theory::set_use_flats;
 use sampler::Sampler;
 
@@ -51,9 +49,6 @@ type ArcSampler = Arc<
 
 fn main() -> Result<(), Box<dyn Error>> {
     // Initialise audio plumbing and sampler.
-    // Suppress warnings from PortAudio
-    // TODO: route these to an error file for debugging
-    let gag_stderr = Gag::stderr();
 
     // We'll create a sample map that maps a single sample to the entire note range.
     let assets = find_folder::Search::ParentsThenKids(5, 5)
@@ -75,7 +70,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Callback is frequently called by PortAudio to fill the audio buffer with samples,
     // which generates sound. Do not do expensive or blocking things in this function!
     let callback = move |pa::OutputStreamCallbackArgs { buffer, .. }| {
-        let gag_stderr = Gag::stderr();
         let buffer: &mut [[f32; CHANNELS as usize]] =
             sample::slice::to_frame_slice_mut(buffer).unwrap();
         sample::slice::equilibrium(buffer);
@@ -83,13 +77,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         let mut sampler = sampler_arc_callback.lock().unwrap();
         sampler.fill_slice(buffer, SAMPLE_RATE);
 
-        drop(gag_stderr);
         pa::Continue
     };
 
     let mut stream = pa.open_non_blocking_stream(settings, callback)?;
     stream.start()?;
-    drop(gag_stderr);
 
     // Audio initialisation is complete. Start processing keyboard input.
     let mut rl = Editor::<()>::new();

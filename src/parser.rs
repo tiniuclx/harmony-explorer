@@ -26,7 +26,7 @@ named! { letter_accidental (&str) -> String,
     do_parse!(
         letter: one_of!("ABCDEFG") >>
         accidental: complete!(alt!(char!('#') | char!('b'))) >>
-        ( [letter, accidental].into_iter().collect() )
+        ( [letter, accidental].iter().collect() )
     )
 }
 
@@ -62,7 +62,7 @@ fn note_map() -> HashMap<String, Letter> {
         ("Bb", Bb),
         ("B", B),
     ]
-    .into_iter()
+    .iter()
     .map(|t| ((t.0).to_string(), t.1))
     .collect()
 }
