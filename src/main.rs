@@ -148,12 +148,12 @@ fn execute(
     arc_sampler: &ArcSampler,
     db: &SqliteConnection,
 ) {
+    use music_theory::*;
     match command {
         // Look up the chord quality in the database, play it and
         // print its notes.
         Command::Chord(letter, quality) => {
             use database::*;
-            use music_theory::*;
             let mut sampler = arc_sampler.lock().unwrap();
             let vel = 0.3;
             match get_quality(&quality, &db) {
@@ -192,7 +192,11 @@ fn execute(
         }
 
         Command::Transpose(distance, letter, quality) => {
-            println!("Transposing {:?}, {:?}, {:?}", distance, letter, quality);
+            let new_letter = *letter + distance;
+            let new_command = Command::Chord(new_letter, quality.to_string());
+
+            println!("{}{}", letter_to_string(new_letter), quality.to_string());
+            execute(&new_command, last_command, arc_sampler, db);
         }
     };
 }

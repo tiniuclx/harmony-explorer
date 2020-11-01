@@ -246,6 +246,7 @@ mod tests {
     fn interval_maths() {
         use intervals::*;
         assert_eq!(C, F + Per5th);
+        assert_eq!(C, F + 7);
         assert_eq!(C, C + Octave);
         assert_eq!(C, C + Octave + Octave);
 
