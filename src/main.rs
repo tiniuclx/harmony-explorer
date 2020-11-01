@@ -192,7 +192,7 @@ fn execute(
         }
 
         Command::Transpose(distance, letter, quality) => {
-            let new_letter = *letter + distance;
+            let new_letter = *letter + *distance;
             let new_command = Command::Chord(new_letter, quality.to_string());
 
             println!("{}{}", letter_to_string(new_letter), quality.to_string());
