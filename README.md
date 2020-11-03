@@ -83,7 +83,8 @@ cargo run
 
 ### Windows
 
-For Windows, you will have to build `portaudio` manually. For this, you will
+You will first need to [install Rust](https://www.rust-lang.org/tools/install). 
+For Windows, you will also have to build `portaudio` manually. For this, you will
 need CMake and Visual Studio Build Tools. Once you've downloaded the
 `portaudio` source, configure it to build using Visual Studio. You can then
 build it by running the folliwing inside a Windows developer shell:
@@ -100,10 +101,17 @@ answer](https://stackoverflow.com/questions/43826572/where-should-i-place-a-stat
 should do the trick, but this didn't really work, or I did it incorrectly.
 
 
-Copy the generated files into the `/LIBPATH` passed to the link command. In my case,
-this is:
+Copy the generated files into the `/LIBPATH` passed to the link command (visible when
+attempting to build the project using Cargo). In my case, this is:
 ```path
 C:\Users\tiniu\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\lib
 ```
 The linker expects to find `portaudio.lib`, so you will also have to rename
 all the files to remove "_x64": `portaudio_x64.lib` shall become `portaudio.lib` and so on. 
+
+Then, download, build and run the project as is typical for Rust:
+```
+git clone https://github.com/tiniuclx/harmony-explorer.git
+cd harmony-explorer
+cargo run
+```
