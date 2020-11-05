@@ -18,6 +18,7 @@ mod database;
 mod music_theory;
 mod parser;
 mod schema;
+mod sequencer;
 
 use diesel::SqliteConnection;
 use std::error::Error;
@@ -50,10 +51,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Initialise audio plumbing and sampler.
 
     // We'll create a sample map that maps a single sample to the entire note range.
-    let assets = find_folder::Search::ParentsThenKids(5, 5)
-        .for_folder("assets")
-        .unwrap();
-    let sample = sampler::Sample::from_wav_file(assets.join(CASIO_PIANO), SAMPLE_RATE).unwrap();
+    let assets = find_folder::Search::ParentsThenKids(5, 5).for_folder("assets")?;
+    let sample = sampler::Sample::from_wav_file(assets.join(CASIO_PIANO), SAMPLE_RATE)?;
     let sample_map = sampler::Map::from_single_sample(sample);
 
     // Create atomic RC pointer to a mutex protecting the polyphonic sampler
@@ -84,7 +83,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Audio initialisation is complete. Start processing keyboard input.
     let mut rl = Editor::<()>::new();
-    if rl.load_history(".music_repl_history").is_err() {
+    if let Err(_) = rl.load_history(".music_repl_history") {
         // No previous history - that's okay!
     }
 
@@ -132,7 +131,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     }
     rl.save_history(".music_repl_history").unwrap();
-    stream.stop()?;
     stream.close()?;
     Ok(())
 }
