@@ -22,14 +22,14 @@ mod sequencer;
 
 use diesel::SqliteConnection;
 use std::error::Error;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc;
+use std::time::Duration;
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
-use sampler::Sampler;
-
 use parser::{parse_command, Command};
+use sampler::Sampler;
 
 const CHANNELS: i32 = 2;
 const SAMPLE_RATE: f64 = 44_100.0;
@@ -37,15 +37,8 @@ const FRAMES_PER_BUFFER: u32 = 1024;
 //const THUMB_PIANO: &'static str = "thumbpiano A#3.wav";
 const CASIO_PIANO: &'static str = "Casio Piano C5.wav";
 
-type ArcSampler = Arc<
-    Mutex<
-        sampler::Sampler<
-            sampler::instrument::mode::Poly,
-            (),
-            Arc<sampler::audio::wav::Audio<[f32; 2]>>,
-        >,
-    >,
->;
+const CHORD_LENGTH: Duration = Duration::from_millis(1000);
+const NOTE_VELOCITY: f32 = 0.6;
 
 fn main() -> Result<(), Box<dyn Error>> {
     // Initialise audio plumbing and sampler.
@@ -54,25 +47,31 @@ fn main() -> Result<(), Box<dyn Error>> {
     let assets = find_folder::Search::ParentsThenKids(5, 5).for_folder("assets")?;
     let sample = sampler::Sample::from_wav_file(assets.join(CASIO_PIANO), SAMPLE_RATE)?;
     let sample_map = sampler::Map::from_single_sample(sample);
-
     // Create atomic RC pointer to a mutex protecting the polyphonic sampler
-    let arc_sampler: ArcSampler =
-        Arc::new(Mutex::new(Sampler::poly((), sample_map).num_voices(12)));
 
+    let mut sampler = Sampler::poly((), sample_map).num_voices(12).release(20.0);
     // Initialise PortAudio and create an output stream.
     let pa = pa::PortAudio::new()?;
     let settings =
         pa.default_output_stream_settings::<f32>(CHANNELS, SAMPLE_RATE, FRAMES_PER_BUFFER)?;
-    let sampler_arc_callback = arc_sampler.clone();
+
+    let (tx, rx) = sequencer::start();
 
     // Callback is frequently called by PortAudio to fill the audio buffer with samples,
     // which generates sound. Do not do expensive or blocking things in this function!
     let callback = move |pa::OutputStreamCallbackArgs { buffer, .. }| {
+        for m in rx.try_iter() {
+            match m {
+                sequencer::Message::NoteOn(n) => sampler.note_on(n.to_hz(), NOTE_VELOCITY),
+                sequencer::Message::NoteOff(n) => sampler.note_off(n.to_hz()),
+                sequencer::Message::Stop => sampler.stop(),
+            }
+        }
+
         let buffer: &mut [[f32; CHANNELS as usize]] =
             sample::slice::to_frame_slice_mut(buffer).unwrap();
         sample::slice::equilibrium(buffer);
 
-        let mut sampler = sampler_arc_callback.lock().unwrap();
         sampler.fill_slice(buffer, SAMPLE_RATE);
 
         pa::Continue
@@ -104,7 +103,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     Ok(("", command)) => {
                         // Act based on the received command, and save it if it
                         // is not empty.
-                        execute(&command, &last_command, &arc_sampler, &db);
+                        execute(&command, &last_command, &tx, &db);
                         if command != Command::EmptyString {
                             last_command = Some(command);
                         }
@@ -142,7 +141,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 fn execute(
     command: &Command,
     last_command: &Option<Command>,
-    arc_sampler: &ArcSampler,
+    tx: &mpsc::Sender<sequencer::Event>,
     db: &SqliteConnection,
 ) {
     use music_theory::*;
@@ -151,18 +150,31 @@ fn execute(
         // print its notes.
         Command::Chord(letter, quality) => {
             use database::*;
-            let mut sampler = arc_sampler.lock().unwrap();
-            let vel = 0.6;
             match get_quality(&quality, &db) {
                 Some(q) => {
-                    let retrieved_quality = q;
                     let chord = Chord {
                         root: LetterOctave(*letter, 4),
-                        quality: retrieved_quality,
+                        quality: q,
                     };
-                    chord.notes().into_iter().for_each(|n| {
-                        sampler.note_on(n.to_hz(), vel);
-                    });
+
+                    chord
+                        .notes()
+                        .into_iter()
+                        .map(|n| {
+                            (
+                                sequencer::Message::NoteOn(n),
+                                sequencer::Message::NoteOff(n),
+                            )
+                        })
+                        .for_each(|(on, off)| {
+                            let zero = Duration::from_millis(0);
+                            tx.send(sequencer::Event { msg: on, del: zero }).unwrap();
+                            tx.send(sequencer::Event {
+                                msg: off,
+                                del: CHORD_LENGTH,
+                            })
+                            .unwrap();
+                        });
 
                     println!("Playing {}", chord);
                 }
@@ -174,7 +186,7 @@ fn execute(
         // Re-do the last command.
         Command::EmptyString => match last_command {
             Some(Command::EmptyString) => (),
-            Some(c) => execute(&c, &None, arc_sampler, db),
+            Some(c) => execute(&c, &None, tx, db),
             None => (),
         },
 
@@ -193,7 +205,7 @@ fn execute(
             let new_command = Command::Chord(new_letter, quality.to_string());
 
             println!("{}{}", letter_to_string(new_letter), quality.to_string());
-            execute(&new_command, last_command, arc_sampler, db);
+            execute(&new_command, last_command, tx, db);
         }
     };
 }
