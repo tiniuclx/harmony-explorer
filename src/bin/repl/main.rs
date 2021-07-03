@@ -1,9 +1,8 @@
-#[macro_use]
 extern crate diesel;
-#[macro_use]
 extern crate diesel_migrations;
 extern crate nom;
 
+extern crate harmony_explorer;
 extern crate enum_primitive_derive;
 extern crate find_folder; // For easily finding the assets folder.
 extern crate num_traits;
@@ -11,14 +10,8 @@ extern crate pitch_calc as pitch; // To work with musical notes.
 extern crate portaudio as pa; // For audio I/O
 extern crate rustyline;
 extern crate dasp; // To convert portaudio sample buffers to frames.
-extern crate sampler;
+// extern crate sampler;
 
-mod chord_library;
-mod database;
-mod music_theory;
-mod parser;
-mod schema;
-mod sequencer;
 
 use diesel::SqliteConnection;
 use std::error::Error;
@@ -28,20 +21,23 @@ use std::time::Duration;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
-use parser::{parse_command, Command};
-use sampler::Sampler;
+use harmony_explorer::parser::{parse_command, Command};
+use harmony_explorer::{chord_library, database, music_theory, sequencer};
+// use sampler::Sampler;
 
+/*
 const CHANNELS: i32 = 2;
 const SAMPLE_RATE: f64 = 44_100.0;
 const FRAMES_PER_BUFFER: u32 = 1024;
 //const THUMB_PIANO: &'static str = "thumbpiano A#3.wav";
 const CASIO_PIANO: &'static str = "Casio Piano C5.wav";
-
-const CHORD_LENGTH: Duration = Duration::from_millis(1000);
 const NOTE_VELOCITY: f32 = 0.6;
+const CHORD_LENGTH: Duration = Duration::from_millis(1000);
+*/
 
 fn main() -> Result<(), Box<dyn Error>> {
     // Initialise audio plumbing and sampler.
+    /*
 
     // We'll create a sample map that maps a single sample to the entire note range.
     let assets = find_folder::Search::ParentsThenKids(5, 5).for_folder("assets")?;
@@ -79,8 +75,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut stream = pa.open_non_blocking_stream(settings, callback)?;
     stream.start()?;
-
+    */
     // Audio initialisation is complete. Start processing keyboard input.
+
+    // Duplicate definition, use one above when adding sound back in
+    let (tx, _) = sequencer::start();
+
     let mut rl = Editor::<()>::new();
     if let Err(_) = rl.load_history(".music_repl_history") {
         // No previous history - that's okay!
@@ -130,7 +130,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     }
     rl.save_history(".music_repl_history").unwrap();
-    stream.close()?;
+    //stream.close()?;
     Ok(())
 }
 
@@ -157,6 +157,7 @@ fn execute(
                         quality: q,
                     };
 
+                    /*
                     chord
                         .notes()
                         .into_iter()
@@ -175,6 +176,7 @@ fn execute(
                             })
                             .unwrap();
                         });
+                    */
 
                     println!("Playing {}", chord);
                 }

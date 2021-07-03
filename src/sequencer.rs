@@ -130,7 +130,7 @@ mod tests {
         let second_msg = Message::Stop;
         let second_event = Event {
             msg: second_msg,
-            del: Duration::from_millis(20),
+            del: Duration::from_millis(200),
         };
 
         let (tx, rx) = start();
@@ -141,7 +141,7 @@ mod tests {
         assert_eq!(rx.recv().unwrap(), first_msg);
         assert!(rx.try_recv().is_err());
 
-        std::thread::sleep(Duration::from_millis(30));
+        std::thread::sleep(Duration::from_millis(300));
         assert_eq!(rx.try_recv().unwrap(), second_msg);
     }
 
@@ -154,7 +154,7 @@ mod tests {
         let msg_4 = Message::NoteOff(LetterOctave(B, 4));
 
         let zero = Duration::from_millis(0);
-        let del = Duration::from_millis(20);
+        let del = Duration::from_millis(200);
 
         let ev_1 = Event {
             msg: msg_1,

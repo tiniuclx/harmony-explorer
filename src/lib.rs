@@ -17,3 +17,4 @@ pub mod database;
 pub mod music_theory;
 pub mod parser;
 pub mod schema;
+pub mod sequencer;
