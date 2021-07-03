@@ -18,7 +18,7 @@ diesel = {version = "1.4.3", features = ["sqlite"]}
 diesel_migrations = "1.4.0"
 # REPL
 rustyline = "5.0.3"
-nom = "6.0.0"
+nom = "6.2.1"
 # Audio 
 # sampler = "0.2.0"
 find_folder = "0.3.0"
