@@ -382,27 +382,9 @@ dependencies = [
  "nom",
  "num 0.4.0",
  "num-traits",
- "pitch_calc 0.12.0",
+ "pitch_calc",
  "portaudio",
  "rustyline",
- "sampler",
-]
-
-[[package]]
-name = "hound"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e971fe26207d3ccdc66806fd9154508b28101fccb53fe152695e3ebcb53bd0f"
-
-[[package]]
-name = "instrument"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35488cca6fb8c15756ccbd410ba65cf4c68dc07f6ea1dac0e63c0902ed69eed1"
-dependencies = [
- "pitch_calc 0.11.1",
- "rand 0.3.23",
- "time_calc",
 ]
 
 [[package]]
@@ -634,16 +616,6 @@ dependencies = [
 
 [[package]]
 name = "pitch_calc"
-version = "0.11.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "62a4fe4bc5e28312afef25e60cb10dc006dd376db75174d3f260a9cc343224bf"
-dependencies = [
- "num 0.1.42",
- "rand 0.3.23",
-]
-
-[[package]]
-name = "pitch_calc"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "387005d7ff9e9970f954ffd33e258f9b755d5f27f11a4b57df3e5c6eab5a46f8"
@@ -820,25 +792,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bfa8506c1de11c9c4e4c38863ccbe02a305c8188e85a05a784c9e11e1c3910c8"
 
 [[package]]
-name = "sample"
-version = "0.6.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80fb6a09c9909286e083dd666073427801c875452c6aada9e4f56bf98a10d76c"
-
-[[package]]
-name = "sampler"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0479015188a4c514ad5d4ebdf948a7bde7730ccd811ce8627dc421d373d796fa"
-dependencies = [
- "hound",
- "instrument",
- "pitch_calc 0.11.1",
- "sample",
- "time_calc",
-]
-
-[[package]]
 name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -872,16 +825,6 @@ name = "tap"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "36474e732d1affd3a6ed582781b3683df3d0563714c59c39591e8ff707cf078e"
-
-[[package]]
-name = "time_calc"
-version = "0.11.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "55c5902a8f9ede9e4761dee6ce621e71e624d8ef0c07a6a292e34ffafefe046d"
-dependencies = [
- "num 0.1.42",
- "rand 0.3.23",
-]
 
 [[package]]
 name = "unicode-segmentation"
