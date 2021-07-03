@@ -9,8 +9,8 @@ extern crate num_traits;
 extern crate pitch_calc; // To work with musical notes.
 extern crate portaudio; // For audio I/O
 extern crate rustyline;
-extern crate sample; // To convert portaudio sample buffers to frames.
-extern crate sampler;
+extern crate dasp; // To convert portaudio sample buffers to frames.
+//extern crate sampler;
 
 pub mod chord_library;
 pub mod database;
