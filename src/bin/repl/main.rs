@@ -2,21 +2,20 @@ extern crate diesel;
 extern crate diesel_migrations;
 extern crate nom;
 
-extern crate harmony_explorer;
+extern crate dasp;
 extern crate enum_primitive_derive;
 extern crate find_folder; // For easily finding the assets folder.
+extern crate harmony_explorer;
 extern crate num_traits;
 extern crate pitch_calc as pitch; // To work with musical notes.
 extern crate portaudio as pa; // For audio I/O
-extern crate rustyline;
-extern crate dasp; // To convert portaudio sample buffers to frames.
-// extern crate sampler;
-
+extern crate rustyline; // To convert portaudio sample buffers to frames.
+                        // extern crate sampler;
 
 use diesel::SqliteConnection;
 use std::error::Error;
 use std::sync::mpsc;
-use std::time::Duration;
+// use std::time::Duration;
 
 use rustyline::error::ReadlineError;
 use rustyline::Editor;

@@ -155,7 +155,7 @@ impl Chord {
     }
 }
 
-static mut USE_FLATS: bool = true;
+static mut USE_FLATS: bool = false;
 
 pub fn set_use_flats(flats: bool) {
     unsafe {

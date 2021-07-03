@@ -72,7 +72,7 @@ named! { pub letter (&str) -> Letter,
     map_opt!(select_letter, |s: String| note_map().get(&s).map(|l| l.clone()))
 }
 
-named! { command_chord (&str) -> Command,
+named! { pub command_chord (&str) -> Command,
     do_parse!(
         letter: letter >>
         chord: not_line_ending >>

@@ -46,6 +46,8 @@ pub fn initialise_database() -> Result<SqliteConnection, Box<dyn std::error::Err
     Ok(connection)
 }
 
+/// Search the chord database for a chord quality with the given name. If the
+/// chord quality is not found, returns `None`
 pub fn get_quality(name: &str, conn: &SqliteConnection) -> Option<Quality> {
     // Search for the full name in the abbreviations table
     let primary_name = names::table
